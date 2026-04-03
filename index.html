@@ -392,6 +392,46 @@
       margin-top: 2rem;
     }
 
+    /* Wildlife photo grid */
+    .wildlife-photos {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 2.5rem;
+    }
+    @media (max-width: 640px) {
+      .wildlife-photos { grid-template-columns: 1fr; }
+    }
+    .wildlife-photo-card {
+      border-radius: 3px;
+      overflow: hidden;
+      position: relative;
+      aspect-ratio: 4/3;
+      background: #0d2218;
+    }
+    .wildlife-photo-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.5s ease;
+      filter: saturate(0.85);
+    }
+    .wildlife-photo-card:hover img {
+      transform: scale(1.05);
+      filter: saturate(1.1);
+    }
+    .wildlife-photo-caption {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 0.6rem 0.8rem;
+      background: linear-gradient(to top, #0d2218ee, transparent);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #a8c4a8;
+    }
+
     /* ── VALUE ────────────────────────────────────────────── */
     .value {
       background: var(--white);
@@ -440,7 +480,7 @@
       margin-top: 0.3rem;
     }
 
-    /* ── ESTATE SALE NOTICE ──────────────────────────────── */
+    /* ── LISTING TIMELINE ────────────────────────────────── */
     .estate {
       background: linear-gradient(135deg, #f7f0e2, #ede4cc);
       border-top: 4px solid var(--gold);
@@ -711,7 +751,7 @@
           Live oak canopy lines the street. Manicured lawns and well-kept homes signal a neighborhood that takes pride in itself. And behind this home, the creek provides a private, ever-changing natural backdrop that most buyers can only dream about.
         </p>
         <p>
-          The thoughtfully designed floor plan maximizes every square foot, and the 28&rsquo; × 17&rsquo; covered deck extends your living space into one of the finest back yards you&rsquo;ll find in this zip code.
+          The thoughtfully designed floor plan maximizes every square foot, and the 16&rsquo; × 32&rsquo; covered deck extends your living space into one of the finest back yards you&rsquo;ll find in this zip code.
         </p>
       </div>
       <!-- Illustrated creek art panel -->
@@ -837,6 +877,11 @@
         <div class="feature-name">Round Rock 78681</div>
         <div class="feature-desc">Top-rated schools, proximity to major employers, and the livability that keeps making Round Rock one of Texas's most sought-after suburbs.</div>
       </div>
+      <div class="feature-card reveal" style="transition-delay:0.6s">
+        <div class="feature-icon">🏊</div>
+        <div class="feature-name">Pool &amp; Tennis Courts</div>
+        <div class="feature-desc">Shadow Brook Pool and tennis courts are private, card-access amenities exclusively for Shadow Brook subdivision residents. No crowds, no strangers — just neighbors.</div>
+      </div>
     </div>
   </div>
 </section>
@@ -850,12 +895,31 @@
       <div class="animal-chip"><span>🦌</span> White-Tailed Deer</div>
       <div class="animal-chip"><span>🦢</span> White Egrets</div>
       <div class="animal-chip"><span>🐦</span> Great Blue Heron</div>
-      <div class="animal-chip"><span>🦋</span> Woodland Butterflies</div>
+      <div class="animal-chip"><span>🦉</span> Barred Owls</div>
+      <div class="animal-chip"><span>🦊</span> Red Foxes</div>
+      <div class="animal-chip"><span>🐢</span> Red-Eared Sliders &amp; Texas Cooters</div>
+      <div class="animal-chip"><span>🐍</span> Texas Milk Snake</div>
       <div class="animal-chip"><span>✨</span> Fireflies at Dusk</div>
     </div>
     <p class="wildlife-copy reveal" style="transition-delay:0.2s">
-      Step onto the covered deck and watch deer pick their way along the opposite bank. Look upstream for the unmistakable silhouette of a great blue heron, perfectly still, waiting. This isn't a nature preserve — it's just your backyard. Every single morning.
+      Step onto the covered deck and watch deer pick their way along the opposite bank. A great blue heron stands motionless on a debris pile mid-creek, waiting for breakfast. At dusk, a barred owl materializes in the live oak canopy — you'll hear its call long before you spot it. Turtles sun themselves on logs. Foxes trot through at dawn. The milk snake that patrols the driveway keeps the rodent population honest. This isn't a nature preserve — it's just Tuesday.
     </p>
+
+    <!-- Photo grid of actual wildlife -->
+    <div class="wildlife-photos reveal" style="transition-delay:0.35s">
+      <div class="wildlife-photo-card">
+        <img src="owl.png" alt="Barred owl perched in live oak canopy" loading="lazy"/>
+        <div class="wildlife-photo-caption">Barred Owl · Live Oak Canopy</div>
+      </div>
+      <div class="wildlife-photo-card">
+        <img src="heron.png" alt="Great Blue Heron on Lake Creek" loading="lazy"/>
+        <div class="wildlife-photo-caption">Great Blue Heron · Lake Creek</div>
+      </div>
+      <div class="wildlife-photo-card">
+        <img src="snake.png" alt="Texas Milk Snake on driveway" loading="lazy"/>
+        <div class="wildlife-photo-caption">Texas Milk Snake · Harmless &amp; Beneficial</div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -879,21 +943,21 @@
   </div>
 </section>
 
-<!-- ── ESTATE SALE ─────────────────────────────────────── -->
+<!-- ── LISTING TIMELINE ────────────────────────────────── -->
 <section class="estate">
   <div class="estate-inner">
     <p class="section-label reveal">Timeline</p>
-    <h2 class="section-title reveal">Estate Sale <em>First,</em><br>Then Listing</h2>
+    <h2 class="section-title reveal"><em>Listing</em> in<br>2–3 Weeks</h2>
     <p class="reveal">
-      Before the home lists, we&rsquo;ll be holding an estate sale in the coming weeks — a chance to acquire quality furnishings and personal effects from a well-loved Central Texas home.
+      This exceptional creek-front property will be officially listed within the next two to three weeks. If you&rsquo;ve been waiting for a creek-side home on West Creek Loop — this is the one.
     </p>
     <p class="reveal">
-      Following the estate sale, the property will officially list. If you want to be among the first to know the moment this home hits the market — or receive estate sale details — reach out to Megan directly.
+      Contact Megan now to be among the first notified the moment it lists, and to ask any questions before it hits the market.
     </p>
     <div class="notify-box reveal">
       <p>
-        <strong>Get notified the moment this property lists.</strong><br>
-        Contact Megan Peeples at Central Metro Realty to be added to the priority notification list for both the estate sale and the listing.
+        <strong>Be first in line.</strong><br>
+        Reach out to Megan Peeples at Central Metro Realty today — get on the priority notification list and beat the crowd.
       </p>
       <a href="tel:+15124977748" class="notify-email-link">📞 &nbsp;(512) 497-7748</a>
     </div>
