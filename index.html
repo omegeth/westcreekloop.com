@@ -480,6 +480,45 @@
       margin-top: 0.3rem;
     }
 
+    /* ── HOME PHOTO ───────────────────────────────────────── */
+    .home-photo-section {
+      background: var(--linen);
+    }
+    .home-photo-wrap {
+      position: relative;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 2rem;
+      box-shadow: 0 20px 60px #1E3D2A22;
+    }
+    .home-photo-wrap img {
+      width: 100%;
+      display: block;
+      max-height: 600px;
+      object-fit: cover;
+      object-position: center 40%;
+      filter: saturate(0.95);
+      transition: filter 0.4s ease;
+    }
+    .home-photo-wrap:hover img {
+      filter: saturate(1.08);
+    }
+    .home-photo-caption {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 2rem 1.8rem 1.4rem;
+      background: linear-gradient(to top, #1a0e0899 0%, transparent 100%);
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #e8dcc8;
+    }
+
     /* ── LISTING TIMELINE ────────────────────────────────── */
     .estate {
       background: linear-gradient(135deg, #f7f0e2, #ede4cc);
@@ -938,6 +977,21 @@
       <div class="value-tag">
         <div class="value-tag-num">$550K+</div>
         <div class="value-tag-note">Comp Sale · 2024</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FRONT OF HOUSE PHOTO ────────────────────────────── -->
+<section class="home-photo-section">
+  <div class="section-inner">
+    <p class="section-label reveal">The Home</p>
+    <h2 class="section-title reveal">Texas <em>Hill Country</em> Stone<br>Under a Live Oak Canopy</h2>
+    <div class="home-photo-wrap reveal" style="transition-delay:0.15s">
+      <img src="front.png" alt="Front view of 1603 West Creek Loop, Round Rock TX — limestone exterior under mature live oaks" loading="lazy"/>
+      <div class="home-photo-caption">
+        <span>1603 West Creek Loop &nbsp;·&nbsp; Round Rock, TX 78681</span>
+        <span>New roof &nbsp;·&nbsp; Limestone exterior &nbsp;·&nbsp; Mature live oak canopy</span>
       </div>
     </div>
   </div>
