@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Trails &amp; Walkability · 1603 West Creek Loop · Round Rock, TX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --cream:    #F7F2E9;
+      --linen:    #EDE6D6;
+      --bark:     #3B2A1A;
+      --moss:     #1E3D2A;
+      --sage:     #4A7C59;
+      --gold:     #B8974A;
+      --gold-lt:  #D4B06A;
+      --creek:    #4E7D96;
+      --white:    #FDFAF5;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--cream);
+      color: var(--bark);
+      font-family: 'Jost', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ──────────────────────────────────────────────── */
+    .site-nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: var(--bark);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.9rem 2rem;
+      box-shadow: 0 2px 20px #00000030;
+    }
+    .nav-home {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem;
+      font-weight: 400;
+      color: var(--gold-lt);
+      text-decoration: none;
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .nav-home:hover { color: var(--white); }
+    .nav-title {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: #a08060;
+    }
+
+    /* ── HERO ─────────────────────────────────────────────── */
+    .hero {
+      min-height: 52vh;
+      background: var(--moss);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 7rem 2rem 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 120%, #4E7D9630 0%, transparent 70%),
+        radial-gradient(ellipse 100% 80% at 80% -10%, #2a5c3a 0%, #0d2218 100%);
+    }
+    .hero-content { position: relative; z-index: 2; }
+    .eyebrow {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--gold-lt);
+      margin-bottom: 1.2rem;
+    }
+    .hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      font-weight: 300;
+      color: var(--white);
+      line-height: 1.05;
+      margin-bottom: 1rem;
+    }
+    .hero h1 em { font-style: italic; color: var(--gold-lt); }
+    .hero-sub {
+      font-size: 1rem;
+      color: #a8c4a8;
+      max-width: 560px;
+      line-height: 1.7;
+    }
+
+    /* ── SECTION BASE ─────────────────────────────────────── */
+    section { padding: 5rem 2rem; }
+    .section-inner { max-width: 1040px; margin: 0 auto; }
+    .section-label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--sage);
+      margin-bottom: 0.8rem;
+    }
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 4.5vw, 3.2rem);
+      font-weight: 300;
+      line-height: 1.15;
+      color: var(--moss);
+      margin-bottom: 1.5rem;
+    }
+    .section-title em { font-style: italic; color: var(--sage); }
+    .body-copy {
+      font-size: 1.05rem;
+      line-height: 1.85;
+      color: #4a3520;
+      max-width: 700px;
+    }
+    .body-copy p { margin-bottom: 1.2rem; }
+    .body-copy p:last-child { margin-bottom: 0; }
+
+    /* ── TRAIL CARDS ─────────────────────────────────────── */
+    .trails-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+    .trail-card {
+      background: var(--white);
+      border: 1px solid #ddd4c0;
+      border-radius: 3px;
+      overflow: hidden;
+      position: relative;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .trail-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 14px 40px #1E3D2A1a;
+    }
+    .trail-card-accent {
+      height: 4px;
+      width: 100%;
+    }
+    .trail-card-body { padding: 1.8rem; }
+    .trail-distance {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+    .trail-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--moss);
+      line-height: 1.2;
+      margin-bottom: 0.8rem;
+    }
+    .trail-desc {
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: #6a5040;
+      margin-bottom: 1.2rem;
+    }
+    .trail-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .trail-tag {
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      background: var(--linen);
+      color: var(--sage);
+      padding: 0.25rem 0.6rem;
+      border-radius: 2px;
+    }
+    .trail-badge-new {
+      display: inline-block;
+      background: var(--gold);
+      color: var(--white);
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.5rem;
+      border-radius: 2px;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+
+    /* ── MAP SECTION ─────────────────────────────────────── */
+    .map-section { background: var(--linen); }
+    .map-wrap {
+      margin-top: 2rem;
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 0 16px 50px #1E3D2A20;
+      position: relative;
+    }
+    .map-wrap img {
+      width: 100%;
+      display: block;
+      max-height: 620px;
+      object-fit: cover;
+      object-position: center;
+    }
+    .map-legend {
+      background: var(--bark);
+      padding: 1.2rem 1.8rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      align-items: center;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #c8b090;
+    }
+    .legend-line {
+      width: 28px;
+      height: 4px;
+      border-radius: 2px;
+    }
+    .map-source {
+      font-size: 0.65rem;
+      color: #7a6040;
+      margin-left: auto;
+    }
+    .map-source a { color: #9a8060; }
+
+    /* ── NEWS CALLOUT ────────────────────────────────────── */
+    .news-callout {
+      background: var(--moss);
+      border-radius: 4px;
+      padding: 2.5rem;
+      margin-top: 3rem;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 1.8rem;
+      align-items: start;
+    }
+    @media (max-width: 580px) {
+      .news-callout { grid-template-columns: 1fr; }
+    }
+    .news-callout-icon {
+      font-size: 2.4rem;
+      line-height: 1;
+    }
+    .news-callout-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold-lt);
+      margin-bottom: 0.5rem;
+    }
+    .news-callout-headline {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: var(--white);
+      line-height: 1.3;
+      margin-bottom: 0.8rem;
+    }
+    .news-callout-body {
+      font-size: 0.9rem;
+      line-height: 1.75;
+      color: #a8c4a8;
+      margin-bottom: 1rem;
+    }
+    .news-callout-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold-lt);
+      text-decoration: none;
+      border-bottom: 1px solid #D4B06A50;
+      padding-bottom: 0.1rem;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .news-callout-link:hover { color: var(--white); border-color: var(--white); }
+
+    /* ── MORE COMING ─────────────────────────────────────── */
+    .more-coming {
+      background: var(--white);
+      text-align: center;
+    }
+    .more-coming .section-inner {
+      max-width: 640px;
+    }
+    .placeholder-trails {
+      margin-top: 2.5rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .placeholder-trail {
+      border: 2px dashed #d4c4a8;
+      border-radius: 3px;
+      padding: 1.8rem 1.2rem;
+      text-align: center;
+      color: #a09070;
+    }
+    .placeholder-trail-icon { font-size: 1.8rem; margin-bottom: 0.5rem; }
+    .placeholder-trail-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      color: #8a7050;
+      margin-bottom: 0.3rem;
+    }
+    .placeholder-trail-note {
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #b0a080;
+    }
+
+    /* ── CTA BAR ──────────────────────────────────────────── */
+    .cta-bar {
+      background: var(--bark);
+      padding: 3rem 2rem;
+      text-align: center;
+    }
+    .cta-bar p {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem;
+      font-weight: 300;
+      color: var(--linen);
+      margin-bottom: 1.2rem;
+    }
+    .cta-bar a {
+      display: inline-block;
+      background: var(--moss);
+      color: var(--white);
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      text-decoration: none;
+      padding: 0.85rem 2.2rem;
+      border-radius: 2px;
+      margin: 0.4rem;
+      transition: background 0.25s;
+    }
+    .cta-bar a:hover { background: var(--sage); }
+    .cta-bar a.phone { background: var(--gold); }
+    .cta-bar a.phone:hover { background: var(--gold-lt); color: var(--bark); }
+
+    /* ── FOOTER ───────────────────────────────────────────── */
+    footer {
+      background: #1a0e08;
+      text-align: center;
+      padding: 1.8rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      color: #5a4030;
+    }
+    footer a { color: #7a6040; text-decoration: none; }
+
+    /* ── REVEAL ───────────────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity 0.75s ease, transform 0.75s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ──────────────────────────────────────────────── -->
+<nav class="site-nav">
+  <a href="index.html" class="nav-home">← 1603 West Creek Loop</a>
+  <span class="nav-title">Trails &amp; Walkability</span>
+</nav>
+
+<!-- ── HERO ─────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-content">
+    <p class="eyebrow">Shadow Brook · Round Rock West · Lake Creek</p>
+    <h1>Walk Out the <em>Door.</em><br>Go Everywhere.</h1>
+    <p class="hero-sub">
+      The neighborhood around 1603 West Creek Loop is woven together by trails, greenbelts, and a new city-funded trail connection that puts downtown Round Rock within walking distance — without touching a car.
+    </p>
+  </div>
+</section>
+
+<!-- ── TRAIL CARDS ────────────────────────────────────────── -->
+<section style="background: var(--white);">
+  <div class="section-inner">
+    <p class="section-label reveal">On Your Doorstep</p>
+    <h2 class="section-title reveal">The Trails of <em>West Creek Loop</em></h2>
+    <div class="trails-grid">
+
+      <div class="trail-card reveal">
+        <div class="trail-card-accent" style="background: linear-gradient(90deg, var(--creek), #3a7a9a);"></div>
+        <div class="trail-card-body">
+          <div class="trail-distance" style="color: var(--creek);">~1 Mile · Paved</div>
+          <div class="trail-name">Lake Creek Trail to Downtown <span class="trail-badge-new">New</span></div>
+          <div class="trail-desc">
+            The city of Round Rock's newly completed Lake Creek Trail runs from Round Rock West Park, through a pedestrian underpass beneath I-35, across a new bridge over Lake Creek, and connects to Centennial Plaza in the heart of downtown. Walk to the farmers market, arts festivals, restaurants, and community events — no car required.
+          </div>
+          <div class="trail-tags">
+            <span class="trail-tag">🚶 Walking</span>
+            <span class="trail-tag">🚲 Biking</span>
+            <span class="trail-tag">Paved</span>
+            <span class="trail-tag">Downtown Access</span>
+            <span class="trail-tag">City of Round Rock</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="trail-card reveal" style="transition-delay:0.1s">
+        <div class="trail-card-accent" style="background: linear-gradient(90deg, var(--sage), var(--moss));"></div>
+        <div class="trail-card-body">
+          <div class="trail-distance" style="color: var(--sage);">Short Walk · Neighborhood</div>
+          <div class="trail-name">Shadow Brook Pool &amp; Tennis</div>
+          <div class="trail-desc">
+            A short, pleasant walk from the house to the private Shadow Brook Pool and tennis courts. Card-access only — exclusively for Shadow Brook subdivision residents. Perfect for morning laps or an afternoon match.
+          </div>
+          <div class="trail-tags">
+            <span class="trail-tag">🏊 Pool</span>
+            <span class="trail-tag">🎾 Tennis</span>
+            <span class="trail-tag">Private Access</span>
+            <span class="trail-tag">Residents Only</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="trail-card reveal" style="transition-delay:0.2s">
+        <div class="trail-card-accent" style="background: linear-gradient(90deg, var(--gold), #c8a040);"></div>
+        <div class="trail-card-body">
+          <div class="trail-distance" style="color: var(--gold);">Walkable · All Ages</div>
+          <div class="trail-name">Schools in the Neighborhood</div>
+          <div class="trail-desc">
+            Elementary, middle, and high school are all within the neighborhood — kids walk to school on quiet residential streets through a mature, tree-lined community. No bus route required, no school-traffic gauntlet.
+          </div>
+          <div class="trail-tags">
+            <span class="trail-tag">🎒 Walkable Schools</span>
+            <span class="trail-tag">Family-Friendly</span>
+            <span class="trail-tag">Safe Streets</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="trail-card reveal" style="transition-delay:0.3s">
+        <div class="trail-card-accent" style="background: linear-gradient(90deg, #4a8a60, var(--sage));"></div>
+        <div class="trail-card-body">
+          <div class="trail-distance" style="color: #4a8a60;">Extensive · Natural Surface</div>
+          <div class="trail-name">Round Rock West Greenbelt</div>
+          <div class="trail-desc">
+            The Round Rock West Greenbelt follows Lake Creek through the neighborhood, connecting open green space, wildlife habitat, and informal trail access along the creek corridor. A natural extension of your backyard.
+          </div>
+          <div class="trail-tags">
+            <span class="trail-tag">🌿 Greenbelt</span>
+            <span class="trail-tag">Wildlife</span>
+            <span class="trail-tag">Creek Access</span>
+            <span class="trail-tag">Dog-Friendly</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="trail-card reveal" style="transition-delay:0.4s">
+        <div class="trail-card-accent" style="background: linear-gradient(90deg, #5a7a50, var(--moss));"></div>
+        <div class="trail-card-body">
+          <div class="trail-distance" style="color: #5a7a50;">Nearby · Paved Loops</div>
+          <div class="trail-name">Round Rock West Park</div>
+          <div class="trail-desc">
+            Round Rock West Park sits at the trailhead of the new Lake Creek Trail. Paved paths, open green space, pond, and a natural staging point for longer walks toward downtown. The park is a hub connecting multiple trail directions.
+          </div>
+          <div class="trail-tags">
+            <span class="trail-tag">🏞️ Park</span>
+            <span class="trail-tag">Paved Paths</span>
+            <span class="trail-tag">Trail Hub</span>
+            <span class="trail-tag">Pond</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="trail-card reveal" style="transition-delay:0.5s">
+        <div class="trail-card-accent" style="background: linear-gradient(90deg, var(--moss), #2a6040);"></div>
+        <div class="trail-card-body">
+          <div class="trail-distance" style="color: var(--moss);">Neighborhood Loop</div>
+          <div class="trail-name">West Creek Loop Itself</div>
+          <div class="trail-desc">
+            The loop street is its own amenity. No through traffic means a safe, quiet route for morning walks with the dog, evening strolls with kids, or just wandering past neighbors' gardens under a canopy of live oaks that took decades to grow.
+          </div>
+          <div class="trail-tags">
+            <span class="trail-tag">🐕 Dog Walk</span>
+            <span class="trail-tag">Loop Street</span>
+            <span class="trail-tag">No Through Traffic</span>
+            <span class="trail-tag">Live Oaks</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── MAP SECTION ────────────────────────────────────────── -->
+<section class="map-section">
+  <div class="section-inner">
+    <p class="section-label reveal">Trail Map</p>
+    <h2 class="section-title reveal">Lake Creek Trail: <em>Neighborhood</em> to Downtown</h2>
+    <div class="body-copy reveal" style="transition-delay:0.1s">
+      <p>
+        The red line traces the approximately one-mile Lake Creek Trail route — from the Round Rock West neighborhood (where West Creek Loop sits, bottom left), along the creek, through a new pedestrian underpass beneath I-35, across the new Lake Creek bridge, and into Centennial Plaza in downtown Round Rock. Sprouts Farmers Market, restaurants, and annual events like the Round Rock Arts Fest are now a walk away.
+      </p>
+    </div>
+    <div class="map-wrap reveal" style="transition-delay:0.2s">
+      <img src="trail-map.png" alt="Map showing Lake Creek Trail route from Round Rock West neighborhood to downtown Round Rock" loading="lazy"/>
+      <div class="map-legend">
+        <div class="legend-item">
+          <div class="legend-line" style="background: #9b2020;"></div>
+          Lake Creek Trail (new)
+        </div>
+        <div class="legend-item">
+          <div class="legend-line" style="background: #4E7D96;"></div>
+          Lake Creek waterway
+        </div>
+        <div class="legend-item" style="gap:0.4rem">
+          📍 West Creek Loop neighborhood · bottom left
+        </div>
+        <span class="map-source">Map: Google Maps · Route courtesy City of Round Rock</span>
+      </div>
+    </div>
+
+    <!-- News callout -->
+    <div class="news-callout reveal" style="transition-delay:0.25s">
+      <div class="news-callout-icon">🌉</div>
+      <div>
+        <div class="news-callout-label">Community Impact · October 2025</div>
+        <div class="news-callout-headline">Bridge Placed Over Lake Creek to Connect Round Rock West with Downtown</div>
+        <div class="news-callout-body">
+          The City of Round Rock used a crane to place a new bridge over Lake Creek as part of the one-mile Lake Creek Trail project. The trail connects Round Rock West Park through a pedestrian underpass under I-35 to Centennial Plaza downtown. The $2.46M project was approved by voters in 2023 and was completed in late 2025 / early 2026.
+        </div>
+        <a href="https://communityimpact.com/austin/round-rock/development/2025/10/08/bridge-placed-over-lake-creek-to-connect-round-rock-west-with-downtown-area/" target="_blank" rel="noopener" class="news-callout-link">
+          Read the full article →
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── MORE TRAILS COMING ──────────────────────────────────── -->
+<section class="more-coming">
+  <div class="section-inner">
+    <p class="section-label reveal" style="text-align:center">More to Explore</p>
+    <h2 class="section-title reveal" style="text-align:center">Additional Trails<br><em>Coming Soon</em></h2>
+    <p class="reveal" style="text-align:center; font-size:1rem; line-height:1.8; color:#6a5040; transition-delay:0.1s">
+      The Shadow Brook neighborhood has several more walking routes, side trails, and park connections. This page will be updated as we document each one — including creek-side paths, the route to Deep Wood Elementary, and informal nature trails through the greenbelt.
+    </p>
+    <div class="placeholder-trails reveal" style="transition-delay:0.2s">
+      <div class="placeholder-trail">
+        <div class="placeholder-trail-icon">🌿</div>
+        <div class="placeholder-trail-name">Creek-Side Path</div>
+        <div class="placeholder-trail-note">Details coming</div>
+      </div>
+      <div class="placeholder-trail">
+        <div class="placeholder-trail-icon">🏫</div>
+        <div class="placeholder-trail-name">School Walk Routes</div>
+        <div class="placeholder-trail-note">Details coming</div>
+      </div>
+      <div class="placeholder-trail">
+        <div class="placeholder-trail-icon">🌳</div>
+        <div class="placeholder-trail-name">Greenbelt Side Trails</div>
+        <div class="placeholder-trail-note">Details coming</div>
+      </div>
+      <div class="placeholder-trail">
+        <div class="placeholder-trail-icon">🏞️</div>
+        <div class="placeholder-trail-name">Deep Wood Loop</div>
+        <div class="placeholder-trail-note">Details coming</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ────────────────────────────────────────────────── -->
+<div class="cta-bar">
+  <p>Ready to walk this neighborhood yourself?</p>
+  <a href="tel:+15124977748" class="phone">📞 &nbsp;(512) 497-7748</a>
+  <a href="index.html">← Back to the Listing</a>
+</div>
+
+<!-- ── FOOTER ──────────────────────────────────────────────── -->
+<footer>
+  <p>1603 West Creek Loop &nbsp;·&nbsp; Round Rock, TX 78681 &nbsp;·&nbsp; Listed by <a href="tel:+15124977748">Megan Peeples</a>, Central Metro Realty</p>
+  <p style="margin-top:0.5rem; color:#3a2818">© 2025 Central Metro Realty. All rights reserved.</p>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
