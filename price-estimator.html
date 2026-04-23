@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Micro-Market Price Estimator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --cream:     #F7F2E9;
+      --linen:     #EDE6D6;
+      --bark:      #3B2A1A;
+      --moss:      #1E3D2A;
+      --sage:      #4A7C59;
+      --gold:      #B8974A;
+      --gold-lt:   #D4B06A;
+      --creek:     #4E7D96;
+      --creek-lt:  #8AB4C8;
+      --white:     #FDFAF5;
+      --dim:       #6a5040;
+      --panel:     #F0E9DC;
+
+      --up: #2d7a4a;
+      --dn: #a03030;
+      --up-bg: #e8f5ee;
+      --dn-bg: #faeaea;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--cream);
+      color: var(--bark);
+      font-family: 'Jost', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ────────────────────────────────── */
+    .site-header {
+      background: var(--bark);
+      padding: 1.6rem 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 4px 24px #00000030;
+    }
+    .header-brand {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+    .header-eyebrow {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+    .header-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: var(--white);
+    }
+    .header-title em { font-style: italic; color: var(--gold-lt); }
+
+    /* ── LIVE PRICE TICKER ──────────────────────── */
+    .price-ticker {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      background: #2a1a0a;
+      border: 1px solid var(--gold);
+      border-radius: 3px;
+      padding: 0.8rem 1.6rem;
+    }
+    .ticker-label {
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: #a08060;
+    }
+    .ticker-price {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.2rem;
+      font-weight: 300;
+      color: var(--gold-lt);
+      line-height: 1;
+      transition: color 0.3s;
+    }
+    .ticker-range {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      color: #7a6040;
+      line-height: 1.5;
+    }
+
+    /* ── LAYOUT ─────────────────────────────────── */
+    .app-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      min-height: calc(100vh - 84px);
+    }
+    @media (max-width: 900px) {
+      .app-layout { grid-template-columns: 1fr; }
+    }
+
+    /* ── FORM PANEL ─────────────────────────────── */
+    .form-panel {
+      padding: 3rem 2.5rem;
+      overflow-y: auto;
+    }
+
+    .form-section {
+      margin-bottom: 2.8rem;
+    }
+    .form-section-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.6rem;
+      padding-bottom: 0.7rem;
+      border-bottom: 1px solid #d4c4a8;
+    }
+    .form-section-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--moss);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .form-section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: var(--moss);
+    }
+
+    .fields-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+    }
+    .field-full { grid-column: 1 / -1; }
+
+    @media (max-width: 640px) {
+      .fields-grid { grid-template-columns: 1fr; }
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .field-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--dim);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .field-value-display {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--moss);
+      font-weight: 500;
+    }
+
+    /* Slider */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: #d4c4a8;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--moss);
+      border: 2px solid var(--gold);
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--moss);
+      border: 2px solid var(--gold);
+      cursor: pointer;
+    }
+
+    /* Select */
+    select {
+      -webkit-appearance: none;
+      appearance: none;
+      background: var(--white);
+      border: 1px solid #c8b898;
+      border-radius: 2px;
+      padding: 0.6rem 2rem 0.6rem 0.8rem;
+      font-family: 'Jost', sans-serif;
+      font-size: 0.88rem;
+      color: var(--bark);
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%233B2A1A'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.7rem center;
+      width: 100%;
+      transition: border-color 0.2s;
+    }
+    select:focus { outline: none; border-color: var(--moss); }
+
+    /* Number input */
+    input[type="number"] {
+      background: var(--white);
+      border: 1px solid #c8b898;
+      border-radius: 2px;
+      padding: 0.6rem 0.8rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--bark);
+      width: 100%;
+      transition: border-color 0.2s;
+    }
+    input[type="number"]:focus { outline: none; border-color: var(--moss); }
+
+    /* Toggle chips */
+    .toggle-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .toggle-chip {
+      display: none;
+    }
+    .toggle-chip + label {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: var(--linen);
+      color: var(--dim);
+      border: 1px solid #c8b898;
+      padding: 0.35rem 0.85rem;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .toggle-chip:checked + label {
+      background: var(--moss);
+      color: var(--white);
+      border-color: var(--moss);
+    }
+
+    /* ── RESULTS PANEL ──────────────────────────── */
+    .results-panel {
+      background: var(--bark);
+      padding: 2.5rem 2rem;
+      position: sticky;
+      top: 84px;
+      height: calc(100vh - 84px);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+    }
+    @media (max-width: 900px) {
+      .results-panel {
+        position: static;
+        height: auto;
+      }
+    }
+
+    .results-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 400;
+      color: var(--gold-lt);
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid #5a3d2840;
+      padding-bottom: 0.8rem;
+    }
+
+    /* Factor breakdown */
+    .factor-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .factor-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding: 0.5rem 0.7rem;
+      border-radius: 2px;
+      background: #2a1a0a;
+      transition: background 0.2s;
+    }
+    .factor-name {
+      font-size: 0.72rem;
+      color: #a08060;
+      letter-spacing: 0.05em;
+      flex: 1;
+    }
+    .factor-bar-wrap {
+      width: 60px;
+      height: 3px;
+      background: #3a2818;
+      border-radius: 2px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .factor-bar {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.5s ease;
+    }
+    .factor-delta {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      min-width: 70px;
+      text-align: right;
+      font-weight: 500;
+    }
+    .delta-pos { color: #6ab88a; }
+    .delta-neg { color: #c07070; }
+    .delta-neu { color: #7a6040; }
+
+    /* Confidence meter */
+    .confidence-block {
+      background: #2a1a0a;
+      border-radius: 3px;
+      padding: 1rem;
+    }
+    .confidence-label {
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: #7a6040;
+      margin-bottom: 0.6rem;
+    }
+    .confidence-bar-track {
+      height: 6px;
+      background: #3a2818;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 0.4rem;
+    }
+    .confidence-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--gold), #e8c880);
+      transition: width 0.5s ease;
+    }
+    .confidence-note {
+      font-size: 0.65rem;
+      color: #6a5030;
+      line-height: 1.5;
+    }
+
+    /* Price per sqft */
+    .psf-block {
+      background: #2a1a0a;
+      border-radius: 3px;
+      padding: 1rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+    }
+    .psf-item {}
+    .psf-label {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #6a5030;
+      margin-bottom: 0.3rem;
+    }
+    .psf-value {
+      font-family: 'DM Mono', monospace;
+      font-size: 1rem;
+      color: var(--gold-lt);
+    }
+
+    /* Market context */
+    .market-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #2a1a0a;
+      border: 1px solid #5a3d2840;
+      padding: 0.7rem 1rem;
+      border-radius: 3px;
+    }
+    .market-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .market-badge-text {
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      color: #a08060;
+    }
+
+    /* Disclaimer */
+    .disclaimer {
+      font-size: 0.62rem;
+      color: #5a4030;
+      line-height: 1.6;
+      border-top: 1px solid #3a2818;
+      padding-top: 1rem;
+      margin-top: auto;
+    }
+
+    /* Animated pulse on price change */
+    @keyframes priceFlash {
+      0%   { color: var(--gold-lt); }
+      30%  { color: #fff; }
+      100% { color: var(--gold-lt); }
+    }
+    .price-flash { animation: priceFlash 0.4s ease; }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ────────────────────────────────────────── -->
+<header class="site-header">
+  <div class="header-brand">
+    <span class="header-eyebrow">Central Texas · Micro-Market</span>
+    <h1 class="header-title">Property <em>Value</em> Estimator</h1>
+  </div>
+  <div class="price-ticker">
+    <div>
+      <div class="ticker-label">Estimated Value</div>
+      <div class="ticker-price" id="tickerPrice">$—</div>
+    </div>
+    <div>
+      <div class="ticker-range" id="tickerRange">—</div>
+    </div>
+  </div>
+</header>
+
+<div class="app-layout">
+
+  <!-- ── FORM PANEL ─────────────────────────────────── -->
+  <div class="form-panel">
+
+    <!-- SECTION 1: Fundamentals -->
+    <div class="form-section">
+      <div class="form-section-header">
+        <div class="form-section-icon">🏠</div>
+        <div class="form-section-title">Property Fundamentals</div>
+      </div>
+      <div class="fields-grid">
+
+        <div class="field field-full">
+          <label class="field-label">
+            Living Area (sq ft)
+            <span class="field-value-display" id="sqftDisplay">—</span>
+          </label>
+          <input type="range" id="sqft" min="800" max="5000" step="50" value="1600" oninput="onSlider('sqft','sqftDisplay', v => v.toLocaleString()+' ft²')">
+        </div>
+
+        <div class="field">
+          <label class="field-label">Bedrooms</label>
+          <select id="beds" onchange="recalc()">
+            <option value="2">2 Bed</option>
+            <option value="3" selected>3 Bed</option>
+            <option value="4">4 Bed</option>
+            <option value="5">5 Bed</option>
+            <option value="6">6+ Bed</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Bathrooms</label>
+          <select id="baths" onchange="recalc()">
+            <option value="1">1 Bath</option>
+            <option value="2" selected>2 Bath</option>
+            <option value="2.5">2.5 Bath</option>
+            <option value="3">3 Bath</option>
+            <option value="4">4+ Bath</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Garage</label>
+          <select id="garage" onchange="recalc()">
+            <option value="0">No Garage</option>
+            <option value="1">1-Car</option>
+            <option value="2" selected>2-Car</option>
+            <option value="3">3-Car</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Lot Size</label>
+          <select id="lotSize" onchange="recalc()">
+            <option value="0.1">Under 0.15 ac</option>
+            <option value="0.2" selected>0.15–0.3 ac</option>
+            <option value="0.5">0.3–0.75 ac</option>
+            <option value="1.0">0.75–1.5 ac</option>
+            <option value="2.0">1.5+ acres</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Home Age / Era</label>
+          <select id="era" onchange="recalc()">
+            <option value="new">Built 2015–present</option>
+            <option value="recent">Built 2000–2014</option>
+            <option value="mature" selected>Built 1985–1999</option>
+            <option value="vintage">Built 1970–1984</option>
+            <option value="historic">Pre-1970</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Renovation Status</label>
+          <select id="reno" onchange="recalc()">
+            <option value="full">Full gut reno (recent)</option>
+            <option value="updated">Updated throughout</option>
+            <option value="partial" selected>Partial / kitchen+baths</option>
+            <option value="original">Original / dated</option>
+            <option value="needs">Needs work</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Roof Age</label>
+          <select id="roof" onchange="recalc()">
+            <option value="new" selected>New (0–2 yrs)</option>
+            <option value="good">Good (3–8 yrs)</option>
+            <option value="mid">Mid-life (9–15 yrs)</option>
+            <option value="old">Aging (16–25 yrs)</option>
+            <option value="end">End-of-life (25+ yrs)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Foundation Type</label>
+          <select id="foundation" onchange="recalc()">
+            <option value="slab" selected>Concrete Slab</option>
+            <option value="pier">Pier & Beam</option>
+            <option value="crawl">Crawl Space</option>
+            <option value="basement">Full Basement</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SECTION 2: Waterfront & Nature -->
+    <div class="form-section">
+      <div class="form-section-header">
+        <div class="form-section-icon">🌊</div>
+        <div class="form-section-title">Water & Nature Premium</div>
+      </div>
+      <div class="fields-grid">
+
+        <div class="field">
+          <label class="field-label">Waterfront Type</label>
+          <select id="waterfront" onchange="recalc()">
+            <option value="none">None / Interior Lot</option>
+            <option value="view">Water View (no frontage)</option>
+            <option value="creek" selected>Creek / Stream Frontage</option>
+            <option value="river">River Frontage</option>
+            <option value="pond">Private Pond</option>
+            <option value="lake">Lake Frontage</option>
+            <option value="gulf">Gulf / Coastal</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Water Access Quality</label>
+          <select id="waterAccess" onchange="recalc()">
+            <option value="na">N/A (no water)</option>
+            <option value="view_only">Visual only</option>
+            <option value="bank" selected>Bank access</option>
+            <option value="dock">Private dock / pier</option>
+            <option value="navigable">Navigable / boatable</option>
+          </select>
+        </div>
+
+        <div class="field field-full">
+          <label class="field-label">
+            Mature Tree Canopy
+            <span class="field-value-display" id="treesDisplay">—</span>
+          </label>
+          <input type="range" id="trees" min="0" max="10" step="1" value="4" oninput="onSlider('trees','treesDisplay', treeLabel)">
+        </div>
+
+        <div class="field">
+          <label class="field-label">Tree Species Quality</label>
+          <select id="treeType" onchange="recalc()">
+            <option value="none">No significant trees</option>
+            <option value="ornamental">Ornamental / small</option>
+            <option value="shade">Shade trees (generic)</option>
+            <option value="liveoak" selected>Live Oaks / Heritage</option>
+            <option value="pecan">Pecan / Fruit bearing</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Wildlife Activity</label>
+          <select id="wildlife" onchange="recalc()">
+            <option value="none">Typical suburban</option>
+            <option value="low">Occasional (birds, squirrels)</option>
+            <option value="med" selected>Regular (deer, egrets, owls)</option>
+            <option value="high">Exceptional biodiversity</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Greenbelt / Nature Buffer</label>
+          <select id="greenbelt" onchange="recalc()">
+            <option value="none">No buffer</option>
+            <option value="small">Small buffer (&lt; 50 ft)</option>
+            <option value="med" selected>Creek / greenbelt (50–200 ft)</option>
+            <option value="large">Extensive (200+ ft)</option>
+            <option value="preserve">Nature preserve / permanent</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Flood Zone Status</label>
+          <select id="flood" onchange="recalc()">
+            <option value="x" selected>Zone X (minimal risk)</option>
+            <option value="x500">Zone X-500 (0.2% annual)</option>
+            <option value="ae">Zone AE (1% / required ins.)</option>
+            <option value="ve">Zone VE (coastal, highest risk)</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SECTION 3: Outdoor Living -->
+    <div class="form-section">
+      <div class="form-section-header">
+        <div class="form-section-icon">🏡</div>
+        <div class="form-section-title">Outdoor Living</div>
+      </div>
+      <div class="fields-grid">
+
+        <div class="field field-full">
+          <label class="field-label">
+            Covered Deck / Patio (sq ft)
+            <span class="field-value-display" id="deckDisplay">—</span>
+          </label>
+          <input type="range" id="deck" min="0" max="1200" step="25" value="512" oninput="onSlider('deck','deckDisplay', v => v>0 ? v.toLocaleString()+' ft²':'None')">
+        </div>
+
+        <div class="field">
+          <label class="field-label">Deck / Patio Quality</label>
+          <select id="deckQuality" onchange="recalc()">
+            <option value="none">No deck / patio</option>
+            <option value="basic">Basic / uncovered</option>
+            <option value="covered" selected>Covered / functional</option>
+            <option value="premium">Premium (outdoor kitchen, etc.)</option>
+            <option value="resort">Resort-style build-out</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Backyard View</label>
+          <select id="backView" onchange="recalc()">
+            <option value="fence">Fence / neighbor</option>
+            <option value="yard">Open yard</option>
+            <option value="greenbelt">Greenbelt / trees</option>
+            <option value="water" selected>Water (creek / pond / lake)</option>
+            <option value="panoramic">Panoramic / Hill Country</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Pool / Water Feature</label>
+          <select id="pool" onchange="recalc()">
+            <option value="none" selected>None</option>
+            <option value="above">Above-ground pool</option>
+            <option value="inground">In-ground pool</option>
+            <option value="spa">Pool + spa</option>
+            <option value="resort">Lagoon / resort style</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Outdoor Fireplace / Firepit</label>
+          <select id="fireplace" onchange="recalc()">
+            <option value="none" selected>None</option>
+            <option value="portable">Portable firepit</option>
+            <option value="builtin">Built-in firepit</option>
+            <option value="fireplace">Outdoor fireplace</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Privacy / Fence</label>
+          <select id="privacy" onchange="recalc()">
+            <option value="open">Open / no fence</option>
+            <option value="partial">Partial fencing</option>
+            <option value="wood" selected>Full wood privacy fence</option>
+            <option value="stone">Stone / masonry wall</option>
+            <option value="natural">Natural (creek / tree buffer)</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SECTION 4: Location & Street -->
+    <div class="form-section">
+      <div class="form-section-header">
+        <div class="form-section-icon">📍</div>
+        <div class="form-section-title">Location & Street Character</div>
+      </div>
+      <div class="fields-grid">
+
+        <div class="field">
+          <label class="field-label">Street Type</label>
+          <select id="street" onchange="recalc()">
+            <option value="arterial">Arterial / high traffic</option>
+            <option value="collector">Collector / moderate</option>
+            <option value="residential">Residential through-street</option>
+            <option value="loop" selected>Loop / cul-de-sac</option>
+            <option value="gated">Gated / private</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Neighborhood Pride Index</label>
+          <select id="curb" onchange="recalc()">
+            <option value="1">Declining</option>
+            <option value="2">Below average</option>
+            <option value="3" selected>Average / stable</option>
+            <option value="4">Above average</option>
+            <option value="5">Exceptional / immaculate</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">School District Rating</label>
+          <select id="schools" onchange="recalc()">
+            <option value="1">Below state avg</option>
+            <option value="2">State average</option>
+            <option value="3">Good (7–8/10)</option>
+            <option value="4" selected>Excellent (8–9/10)</option>
+            <option value="5">Top 5% statewide</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Walkable Schools</label>
+          <select id="walkSchools" onchange="recalc()">
+            <option value="0">Drive only</option>
+            <option value="1" selected>Walk/bike possible</option>
+            <option value="2">Walking distance (&lt;0.5 mi)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Trail / Greenway Access</label>
+          <select id="trails" onchange="recalc()">
+            <option value="none">No trails nearby</option>
+            <option value="close">Within 0.5 mi</option>
+            <option value="adjacent" selected>Adjacent / on-property access</option>
+            <option value="destination">Trail to major destination</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Highway Proximity / Noise</label>
+          <select id="highway" onchange="recalc()">
+            <option value="adjacent">Adjacent / audible constantly</option>
+            <option value="near">Near (&lt;0.3 mi, audible)</option>
+            <option value="med" selected>Moderate (0.3–1 mi)</option>
+            <option value="far">Far (&gt;1 mi, none)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Employer Proximity</label>
+          <select id="employment" onchange="recalc()">
+            <option value="rural">Rural / isolated</option>
+            <option value="suburb">Typical suburb</option>
+            <option value="corridor" selected>Tech/employer corridor (≤20 min)</option>
+            <option value="urban">Urban core (≤10 min)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Crime Rate</label>
+          <select id="crime" onchange="recalc()">
+            <option value="high">Above average</option>
+            <option value="avg">City average</option>
+            <option value="low" selected>Below average</option>
+            <option value="vlow">Exceptionally low</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SECTION 5: HOA & Community -->
+    <div class="form-section">
+      <div class="form-section-header">
+        <div class="form-section-icon">🏊</div>
+        <div class="form-section-title">Community Amenities</div>
+      </div>
+      <div class="fields-grid">
+
+        <div class="field">
+          <label class="field-label">HOA Amenities</label>
+          <select id="hoa" onchange="recalc()">
+            <option value="none">No HOA</option>
+            <option value="minimal">HOA (deed restrictions only)</option>
+            <option value="pool" selected>Pool + tennis (private)</option>
+            <option value="clubhouse">Full clubhouse + amenities</option>
+            <option value="resort">Resort-style HOA campus</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">HOA Annual Dues</label>
+          <select id="hoaDues" onchange="recalc()">
+            <option value="0">$0 (no HOA)</option>
+            <option value="low" selected>Low (&lt; $500/yr)</option>
+            <option value="mid">Moderate ($500–$1,500)</option>
+            <option value="high">High ($1,500–$3,000)</option>
+            <option value="luxury">Luxury ($3,000+)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Market Trend (6-month)</label>
+          <select id="trend" onchange="recalc()">
+            <option value="-3">Declining (≥ -5%)</option>
+            <option value="-1">Softening (-1 to -5%)</option>
+            <option value="0">Flat</option>
+            <option value="2" selected>Appreciating (+1–5%)</option>
+            <option value="5">Hot market (+5%+)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Inventory Scarcity</label>
+          <select id="inventory" onchange="recalc()">
+            <option value="-2">Buyer's market (lots of supply)</option>
+            <option value="0" selected>Balanced</option>
+            <option value="2">Tight (few comps)</option>
+            <option value="4">Extremely scarce / no comps</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Season / Timing</label>
+          <select id="season" onchange="recalc()">
+            <option value="-2">Off-season (Nov–Jan)</option>
+            <option value="1" selected>Peak season (Apr–Jun)</option>
+            <option value="0">Shoulder (Jul–Oct, Feb–Mar)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Base Market ($/sqft)</label>
+          <select id="baseMarket" onchange="recalc()">
+            <option value="160">Rural / small market (~$160)</option>
+            <option value="220" selected>Suburban TX (~$220)</option>
+            <option value="280">Austin metro adj (~$280)</option>
+            <option value="340">High-demand suburb (~$340)</option>
+            <option value="450">Urban / premium (~$450)</option>
+            <option value="600">Luxury market (~$600+)</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SECTION 6: Bonus Factors -->
+    <div class="form-section">
+      <div class="form-section-header">
+        <div class="form-section-icon">✨</div>
+        <div class="form-section-title">Bonus & Intangible Factors</div>
+      </div>
+      <div class="toggle-group" id="bonusGroup">
+        <input type="checkbox" class="toggle-chip" id="b_cornerlot" onchange="recalc()">
+        <label for="b_cornerlot">Corner Lot</label>
+
+        <input type="checkbox" class="toggle-chip" id="b_sunset" onchange="recalc()">
+        <label for="b_sunset">Sunset Views</label>
+
+        <input type="checkbox" class="toggle-chip" id="b_cul" onchange="recalc()">
+        <label for="b_cul">True Cul-de-Sac</label>
+
+        <input type="checkbox" class="toggle-chip" id="b_solar" onchange="recalc()">
+        <label for="b_solar">Solar Panels</label>
+
+        <input type="checkbox" class="toggle-chip" id="b_ev" onchange="recalc()">
+        <label for="b_ev">EV Charger</label>
+
+        <input type="checkbox" class="toggle-chip" id="b_smart" onchange="recalc()">
+        <label for="b_smart">Smart Home</label>
+
+        <input type="checkbox" class="toggle-chip" id="b_airbnb" onchange="recalc()">
+        <label for="b_airbnb">STR / Airbnb Eligible</label>
+
+        <input type="checkbox" class="toggle-chip" id="b_guest" onchange="recalc()">
+        <label for="b_guest">Guest Suite / ADU</label>
+
+        <input type="checkbox" class="toggle-chip" id="b_workshop" onchange="recalc()">
+        <label for="b_workshop">Workshop / She-shed</label>
+
+        <input type="checkbox" class="toggle-chip" id="b_nat_light" onchange="recalc()">
+        <label for="b_nat_light">Exceptional Natural Light</label>
+
+        <input type="checkbox" class="toggle-chip" id="b_fireflies" checked onchange="recalc()">
+        <label for="b_fireflies">Fireflies at Dusk 🪄</label>
+
+        <input type="checkbox" class="toggle-chip" id="b_noback" onchange="recalc()">
+        <label for="b_noback">No Back Neighbors</label>
+
+        <input type="checkbox" class="toggle-chip" id="b_sprinkler" onchange="recalc()">
+        <label for="b_sprinkler">Irrigation System</label>
+
+        <input type="checkbox" class="toggle-chip" id="b_generator" onchange="recalc()">
+        <label for="b_generator">Whole-Home Generator</label>
+
+        <input type="checkbox" class="toggle-chip" id="b_storage" onchange="recalc()">
+        <label for="b_storage">Oversized Storage / RV Gate</label>
+      </div>
+    </div>
+
+  </div><!-- /form-panel -->
+
+  <!-- ── RESULTS PANEL ────────────────────────────────── -->
+  <aside class="results-panel">
+    <div class="results-heading">Live Valuation Breakdown</div>
+
+    <!-- PSF stats -->
+    <div class="psf-block">
+      <div class="psf-item">
+        <div class="psf-label">Price / sq ft</div>
+        <div class="psf-value" id="psfDisplay">—</div>
+      </div>
+      <div class="psf-item">
+        <div class="psf-label">Living Area</div>
+        <div class="psf-value" id="sqftResult">—</div>
+      </div>
+      <div class="psf-item">
+        <div class="psf-label">Low Estimate</div>
+        <div class="psf-value" id="lowDisplay">—</div>
+      </div>
+      <div class="psf-item">
+        <div class="psf-label">High Estimate</div>
+        <div class="psf-value" id="highDisplay">—</div>
+      </div>
+    </div>
+
+    <!-- Factor breakdown -->
+    <div class="results-heading" style="font-size:0.85rem;">Factor Contributions</div>
+    <div class="factor-list" id="factorList"></div>
+
+    <!-- Confidence -->
+    <div class="confidence-block">
+      <div class="confidence-label">Model Confidence</div>
+      <div class="confidence-bar-track">
+        <div class="confidence-bar-fill" id="confBar" style="width:0%"></div>
+      </div>
+      <div class="confidence-note" id="confNote">—</div>
+    </div>
+
+    <!-- Market badge -->
+    <div class="market-badge">
+      <div class="market-dot" id="marketDot" style="background:#6a5030"></div>
+      <div class="market-badge-text" id="marketBadgeText">Calculating...</div>
+    </div>
+
+    <div class="disclaimer">
+      This tool provides a rough heuristic estimate based on publicly known micro-market factors. It is not an appraisal and should not be used for financing or legal purposes. Consult a licensed appraiser and real estate agent for actionable valuations. Estimates are relative to the base market $/sqft you select.
+    </div>
+  </aside>
+
+</div><!-- /app-layout -->
+
+<script>
+  // ── Slider helper ──────────────────────────────────
+  function onSlider(id, displayId, formatter) {
+    const v = parseFloat(document.getElementById(id).value);
+    document.getElementById(displayId).textContent = formatter(v);
+    recalc();
+  }
+
+  function treeLabel(n) {
+    if (n === 0) return 'None';
+    if (n <= 2)  return `${n} (sparse)`;
+    if (n <= 5)  return `${n} (moderate)`;
+    if (n <= 8)  return `${n} (canopy)`;
+    return `${n} (magnificent)`;
+  }
+
+  // ── Main recalculator ──────────────────────────────
+  function recalc() {
+    const sqft       = parseFloat(document.getElementById('sqft').value);
+    const beds       = parseFloat(document.getElementById('beds').value);
+    const baths      = parseFloat(document.getElementById('baths').value);
+    const garage     = parseFloat(document.getElementById('garage').value);
+    const lotSize    = parseFloat(document.getElementById('lotSize').value);
+    const era        = document.getElementById('era').value;
+    const reno       = document.getElementById('reno').value;
+    const roofVal    = document.getElementById('roof').value;
+    const foundation = document.getElementById('foundation').value;
+    const baseMarket = parseFloat(document.getElementById('baseMarket').value);
+
+    const waterfront  = document.getElementById('waterfront').value;
+    const waterAccess = document.getElementById('waterAccess').value;
+    const trees       = parseFloat(document.getElementById('trees').value);
+    const treeType    = document.getElementById('treeType').value;
+    const wildlife    = document.getElementById('wildlife').value;
+    const greenbelt   = document.getElementById('greenbelt').value;
+    const flood       = document.getElementById('flood').value;
+
+    const deck        = parseFloat(document.getElementById('deck').value);
+    const deckQuality = document.getElementById('deckQuality').value;
+    const backView    = document.getElementById('backView').value;
+    const pool        = document.getElementById('pool').value;
+    const fireplace   = document.getElementById('fireplace').value;
+    const privacy     = document.getElementById('privacy').value;
+
+    const street      = document.getElementById('street').value;
+    const curb        = parseFloat(document.getElementById('curb').value);
+    const schools     = parseFloat(document.getElementById('schools').value);
+    const walkSchools = parseFloat(document.getElementById('walkSchools').value);
+    const trailAccess = document.getElementById('trails').value;
+    const highway     = document.getElementById('highway').value;
+    const employment  = document.getElementById('employment').value;
+    const crime       = document.getElementById('crime').value;
+
+    const hoa         = document.getElementById('hoa').value;
+    const hoaDues     = document.getElementById('hoaDues').value;
+    const trend       = parseFloat(document.getElementById('trend').value);
+    const inventory   = parseFloat(document.getElementById('inventory').value);
+    const season      = parseFloat(document.getElementById('season').value);
+
+    // ── Base value ─────────────────────────────────
+    let base = sqft * baseMarket;
+    let factors = [];
+
+    // ── Era / age adjustment ───────────────────────
+    const eraMap = { new: 1.12, recent: 1.05, mature: 1.0, vintage: 0.94, historic: 0.90 };
+    const eraM = eraMap[era];
+    factors.push({ name: 'Home Era', mult: eraM, label: era });
+
+    // ── Renovation ─────────────────────────────────
+    const renoMap = { full: 1.15, updated: 1.07, partial: 1.0, original: 0.93, needs: 0.84 };
+    const renoM = renoMap[reno];
+    factors.push({ name: 'Renovation', mult: renoM, label: reno });
+
+    // ── Roof ───────────────────────────────────────
+    const roofMap = { new: 1.02, good: 1.01, mid: 1.0, old: 0.975, end: 0.94 };
+    const roofM = roofMap[roofVal];
+    factors.push({ name: 'Roof', mult: roofM, label: roofVal });
+
+    // ── Garage & beds/baths (flat adds) ───────────
+    const garageAdd = { 0: -8000, 1: 0, 2: 8000, 3: 18000 }[garage] ?? 0;
+    const bathBonus = (baths - 2) * 7000;
+    const bedsBonus = (beds - 3) * 5000;
+    let flatAdds = garageAdd + bathBonus + bedsBonus;
+
+    // ── Lot ────────────────────────────────────────
+    const lotMap = { 0.1: 0.97, 0.2: 1.0, 0.5: 1.04, 1.0: 1.07, 2.0: 1.11 };
+    const lotM = lotMap[lotSize] ?? 1.0;
+    factors.push({ name: 'Lot Size', mult: lotM, label: `${lotSize} ac` });
+
+    // ── Waterfront ─────────────────────────────────
+    const wfMap = { none: 0, view: 0.04, creek: 0.18, river: 0.28, pond: 0.20, lake: 0.35, gulf: 0.50 };
+    const wfPct = wfMap[waterfront] ?? 0;
+    const wfAdd = base * wfPct;
+    factors.push({ name: 'Waterfront', delta: wfAdd, label: waterfront });
+
+    // ── Water access ───────────────────────────────
+    const waMap = { na: 0, view_only: 0, bank: 0.03, dock: 0.07, navigable: 0.12 };
+    const waAdd = base * (waMap[waterAccess] ?? 0);
+    factors.push({ name: 'Water Access', delta: waAdd, label: waterAccess });
+
+    // ── Trees ──────────────────────────────────────
+    const treeTypeMap = { none: 0, ornamental: 0.005, shade: 0.01, liveoak: 0.02, pecan: 0.015 };
+    const treePct = (trees / 10) * (treeTypeMap[treeType] ?? 0) * 4;
+    const treeAdd = base * treePct;
+    factors.push({ name: 'Tree Canopy', delta: treeAdd, label: `${trees} ${treeType}` });
+
+    // ── Greenbelt ──────────────────────────────────
+    const gbMap = { none: 0, small: 0.02, med: 0.05, large: 0.08, preserve: 0.12 };
+    const gbAdd = base * (gbMap[greenbelt] ?? 0);
+    factors.push({ name: 'Nature Buffer', delta: gbAdd });
+
+    // ── Flood zone ─────────────────────────────────
+    const floodMap = { x: 0, x500: -0.02, ae: -0.06, ve: -0.12 };
+    const floodAdd = base * (floodMap[flood] ?? 0);
+    factors.push({ name: 'Flood Zone', delta: floodAdd, label: flood });
+
+    // ── Wildlife ───────────────────────────────────
+    const wlMap = { none: 0, low: 0.01, med: 0.025, high: 0.04 };
+    const wlAdd = base * (wlMap[wildlife] ?? 0);
+    factors.push({ name: 'Wildlife / Setting', delta: wlAdd });
+
+    // ── Deck ───────────────────────────────────────
+    const deckBase = deck * 55;
+    const dqMap = { none: 0, basic: 0.7, covered: 1.0, premium: 1.35, resort: 1.9 };
+    const deckAdd = deckBase * (dqMap[deckQuality] ?? 0);
+    factors.push({ name: `Deck (${deck} ft²)`, delta: deckAdd });
+
+    // ── Back view ──────────────────────────────────
+    const bvMap = { fence: -5000, yard: 0, greenbelt: 12000, water: 25000, panoramic: 35000 };
+    const bvAdd = bvMap[backView] ?? 0;
+    factors.push({ name: 'Back Yard View', delta: bvAdd, label: backView });
+
+    // ── Pool ───────────────────────────────────────
+    const poolMap = { none: 0, above: 3000, inground: 32000, spa: 50000, resort: 85000 };
+    const poolAdd = poolMap[pool] ?? 0;
+    if (poolAdd !== 0) factors.push({ name: 'Pool', delta: poolAdd });
+
+    // ── Fireplace ─────────────────────────────────
+    const fpMap = { none: 0, portable: 500, builtin: 3000, fireplace: 7000 };
+    const fpAdd = fpMap[fireplace] ?? 0;
+    if (fpAdd > 0) factors.push({ name: 'Outdoor Fireplace', delta: fpAdd });
+
+    // ── Privacy ────────────────────────────────────
+    const privMap = { open: -3000, partial: 0, wood: 3000, stone: 7000, natural: 12000 };
+    const privAdd = privMap[privacy] ?? 0;
+    factors.push({ name: 'Privacy', delta: privAdd });
+
+    // ── Street ─────────────────────────────────────
+    const stMap = { arterial: -0.06, collector: -0.02, residential: 0, loop: 0.04, gated: 0.09 };
+    const stAdd = base * (stMap[street] ?? 0);
+    factors.push({ name: 'Street Type', delta: stAdd, label: street });
+
+    // ── Curb / neighborhood pride ──────────────────
+    const curbM = 0.95 + (curb - 1) * 0.025;
+    factors.push({ name: 'Neighborhood Pride', mult: curbM });
+
+    // ── Schools ────────────────────────────────────
+    const schoolPct = (schools - 3) * 0.03;
+    const schoolAdd = base * schoolPct;
+    factors.push({ name: 'School District', delta: schoolAdd });
+
+    // ── Walkable schools ───────────────────────────
+    const wsAdd = walkSchools * 5000;
+    if (wsAdd > 0) factors.push({ name: 'Walk to School', delta: wsAdd });
+
+    // ── Trails ─────────────────────────────────────
+    const trailMap = { none: 0, close: 0.01, adjacent: 0.025, destination: 0.05 };
+    const trailAdd = base * (trailMap[trailAccess] ?? 0);
+    factors.push({ name: 'Trail Access', delta: trailAdd });
+
+    // ── Highway noise ──────────────────────────────
+    const hwMap = { adjacent: -0.08, near: -0.04, med: 0, far: 0.02 };
+    const hwAdd = base * (hwMap[highway] ?? 0);
+    factors.push({ name: 'Highway Noise', delta: hwAdd });
+
+    // ── Employment ─────────────────────────────────
+    const empMap = { rural: -0.05, suburb: 0, corridor: 0.04, urban: 0.07 };
+    const empAdd = base * (empMap[employment] ?? 0);
+    factors.push({ name: 'Job Proximity', delta: empAdd });
+
+    // ── Crime ──────────────────────────────────────
+    const crimeMap = { high: -0.05, avg: 0, low: 0.03, vlow: 0.05 };
+    const crimeAdd = base * (crimeMap[crime] ?? 0);
+    factors.push({ name: 'Crime Rate', delta: crimeAdd });
+
+    // ── HOA amenities ─────────────────────────────
+    const hoaMap = { none: 0, minimal: 0.01, pool: 0.04, clubhouse: 0.06, resort: 0.09 };
+    const hoaAdd = base * (hoaMap[hoa] ?? 0);
+    if (hoaAdd !== 0) factors.push({ name: 'HOA Amenities', delta: hoaAdd });
+
+    // ── HOA dues (negative) ────────────────────────
+    const hoaDuesMap = { 0: 0, low: -3000, mid: -8000, high: -16000, luxury: -25000 };
+    const hoaDuesAdd = hoaDuesMap[hoaDues] ?? 0;
+    if (hoaDuesAdd !== 0) factors.push({ name: 'HOA Dues Impact', delta: hoaDuesAdd });
+
+    // ── Market trend & timing ─────────────────────
+    const trendAdd = base * (trend / 100);
+    factors.push({ name: 'Market Trend', delta: trendAdd });
+    const invAdd = base * (inventory / 100);
+    if (Math.abs(invAdd) > 500) factors.push({ name: 'Inventory Scarcity', delta: invAdd });
+    const seasonAdd = base * (season / 100);
+    if (Math.abs(seasonAdd) > 500) factors.push({ name: 'Seasonal Timing', delta: seasonAdd });
+
+    // ── Bonus chips ────────────────────────────────
+    const bonuses = {
+      b_cornerlot:  -4000,
+      b_sunset:      8000,
+      b_cul:         7000,
+      b_solar:      12000,
+      b_ev:          3000,
+      b_smart:       4000,
+      b_airbnb:     18000,
+      b_guest:      22000,
+      b_workshop:    8000,
+      b_nat_light:   6000,
+      b_fireflies:   9000,  // yes, really
+      b_noback:      8000,
+      b_sprinkler:   3000,
+      b_generator:   7000,
+      b_storage:     5000,
+    };
+    const bonusNames = {
+      b_cornerlot:  'Corner Lot',
+      b_sunset:     'Sunset Views',
+      b_cul:        'True Cul-de-Sac',
+      b_solar:      'Solar Panels',
+      b_ev:         'EV Charger',
+      b_smart:      'Smart Home',
+      b_airbnb:     'STR Eligible',
+      b_guest:      'Guest Suite / ADU',
+      b_workshop:   'Workshop',
+      b_nat_light:  'Natural Light',
+      b_fireflies:  '✨ Fireflies',
+      b_noback:     'No Back Neighbors',
+      b_sprinkler:  'Irrigation System',
+      b_generator:  'Whole-Home Generator',
+      b_storage:    'Oversized Storage',
+    };
+
+    let bonusTotal = 0;
+    for (const [id, val] of Object.entries(bonuses)) {
+      if (document.getElementById(id)?.checked) {
+        bonusTotal += val;
+        if (Math.abs(val) > 0) factors.push({ name: bonusNames[id], delta: val });
+      }
+    }
+
+    // ── Assemble final price ───────────────────────
+    let price = base;
+    let totalMultDelta = 0;
+    let totalFlatDelta = 0;
+
+    // Apply multipliers (compounding)
+    for (const f of factors) {
+      if (f.mult !== undefined) {
+        const delta = price * (f.mult - 1);
+        f._delta = delta;
+        price *= f.mult;
+        totalMultDelta += delta;
+      }
+    }
+    // Apply flat adds
+    for (const f of factors) {
+      if (f.delta !== undefined) {
+        f._delta = f.delta;
+        price += f.delta;
+        totalFlatDelta += f.delta;
+      }
+    }
+
+    price += flatAdds + bonusTotal;
+
+    // ── Confidence ────────────────────────────────
+    let confidence = 60;
+    if (waterfront !== 'none') confidence += 5;
+    if (trees > 4) confidence += 3;
+    const compsAvailable = (inventory < 0);
+    if (compsAvailable) confidence += 5;
+    confidence = Math.min(confidence, 82); // never let it claim too much
+
+    // ── Range ─────────────────────────────────────
+    const spread = price * 0.08;
+    const low = price - spread;
+    const high = price + spread;
+
+    // ── Render ────────────────────────────────────
+    const fmt = n => '$' + Math.round(n).toLocaleString();
+
+    // Flash ticker
+    const tickerEl = document.getElementById('tickerPrice');
+    tickerEl.textContent = fmt(price);
+    tickerEl.classList.remove('price-flash');
+    void tickerEl.offsetWidth;
+    tickerEl.classList.add('price-flash');
+
+    document.getElementById('tickerRange').innerHTML = `Low: ${fmt(low)}\nHigh: ${fmt(high)}`;
+    document.getElementById('psfDisplay').textContent = '$' + Math.round(price / sqft) + '/ft²';
+    document.getElementById('sqftResult').textContent = sqft.toLocaleString() + ' ft²';
+    document.getElementById('lowDisplay').textContent = fmt(low);
+    document.getElementById('highDisplay').textContent = fmt(high);
+
+    // Factor list (sort by magnitude)
+    const allFactors = factors.map(f => ({
+      name: f.name,
+      delta: f._delta ?? f.delta ?? 0,
+      label: f.label
+    })).filter(f => Math.abs(f.delta) > 200);
+
+    allFactors.sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
+
+    const maxDelta = Math.max(...allFactors.map(f => Math.abs(f.delta)), 1);
+
+    let html = '';
+    for (const f of allFactors.slice(0, 14)) {
+      const pct = Math.round((Math.abs(f.delta) / maxDelta) * 100);
+      const isPos = f.delta >= 0;
+      const color = isPos ? '#4a9a6a' : '#c07070';
+      const cls = isPos ? 'delta-pos' : 'delta-neg';
+      const sign = isPos ? '+' : '';
+      html += `
+        <div class="factor-row">
+          <div class="factor-name">${f.name}</div>
+          <div class="factor-bar-wrap">
+            <div class="factor-bar" style="width:${pct}%;background:${color}"></div>
+          </div>
+          <div class="factor-delta ${cls}">${sign}${fmt(f.delta)}</div>
+        </div>`;
+    }
+    document.getElementById('factorList').innerHTML = html;
+
+    // Confidence
+    document.getElementById('confBar').style.width = confidence + '%';
+    document.getElementById('confNote').textContent =
+      confidence >= 75 ? 'Good — multiple data points align.' :
+      confidence >= 65 ? 'Moderate — some factors may need local comps to refine.' :
+                         'Low — limited inputs or unusual combination. Get a CMA.';
+
+    // Market badge
+    const dot = document.getElementById('marketDot');
+    const badgeTxt = document.getElementById('marketBadgeText');
+    const trendV = parseFloat(document.getElementById('trend').value);
+    const invV = parseFloat(document.getElementById('inventory').value);
+    if (trendV >= 2 && invV >= 2) {
+      dot.style.background = '#4a9a6a';
+      badgeTxt.textContent = 'Seller\'s Market — favorable for listing';
+    } else if (trendV <= -1) {
+      dot.style.background = '#c07070';
+      badgeTxt.textContent = 'Cooling Market — price carefully';
+    } else {
+      dot.style.background = '#d4b06a';
+      badgeTxt.textContent = 'Balanced Market';
+    }
+  }
+
+  // ── Init ──────────────────────────────────────────
+  window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('sqftDisplay').textContent = '1,600 ft²';
+    document.getElementById('treesDisplay').textContent = '4 (moderate)';
+    document.getElementById('deckDisplay').textContent = '512 ft²';
+    recalc();
+  });
+</script>
+</body>
+</html>
