@@ -45,16 +45,9 @@
       flex-wrap: wrap;
       gap: 1rem;
       border-bottom: 1px solid #ffffff12;
-      position: relative;
       z-index: 10;
     }
-
-    .header-left {
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
-    }
-
+    .header-left { display: flex; flex-direction: column; gap: 0.2rem; }
     .header-eyebrow {
       font-size: 0.65rem;
       font-weight: 600;
@@ -62,7 +55,6 @@
       text-transform: uppercase;
       color: var(--gold-lt);
     }
-
     .header-title {
       font-family: 'Cormorant Garamond', serif;
       font-size: clamp(1.1rem, 3vw, 1.6rem);
@@ -71,7 +63,6 @@
       line-height: 1.1;
     }
     .header-title em { font-style: italic; color: var(--gold-lt); }
-
     .back-link {
       display: inline-flex;
       align-items: center;
@@ -88,12 +79,9 @@
       transition: background 0.2s, color 0.2s;
       white-space: nowrap;
     }
-    .back-link:hover {
-      background: var(--gold);
-      color: var(--moss);
-    }
+    .back-link:hover { background: var(--gold); color: var(--moss); }
 
-    /* ── MAIN STAGE ─────────────────────────────────── */
+    /* ── STAGE ──────────────────────────────────────── */
     .stage {
       flex: 1;
       display: flex;
@@ -101,20 +89,17 @@
       align-items: center;
       justify-content: center;
       padding: 2rem 1rem 1rem;
-      position: relative;
     }
 
-    /* Loading state */
+    /* Loading */
     .loading {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 1.2rem;
-      color: #7a9e8a;
     }
     .loading-spinner {
-      width: 36px;
-      height: 36px;
+      width: 36px; height: 36px;
       border: 2px solid #ffffff18;
       border-top-color: var(--gold);
       border-radius: 50%;
@@ -128,8 +113,9 @@
       color: var(--gold-lt);
     }
 
-    /* Error state */
+    /* Error */
     .error-msg {
+      display: none;
       text-align: center;
       color: #c89070;
       font-size: 0.9rem;
@@ -145,11 +131,17 @@
       margin-bottom: 0.5rem;
     }
 
-    /* Slideshow wrapper */
-    .slideshow { display: none; width: 100%; max-width: 1100px; flex-direction: column; align-items: center; gap: 1.5rem; }
+    /* Slideshow */
+    .slideshow {
+      display: none;
+      width: 100%;
+      max-width: 1100px;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
     .slideshow.ready { display: flex; }
 
-    /* Counter */
     .counter {
       font-size: 0.68rem;
       font-weight: 600;
@@ -159,7 +151,7 @@
       align-self: flex-end;
     }
 
-    /* Main image frame */
+    /* ── MAIN FRAME ─────────────────────────────────── */
     .main-frame {
       position: relative;
       width: 100%;
@@ -170,6 +162,11 @@
       box-shadow: 0 24px 72px #00000060;
     }
 
+    /*
+     * Slides: stacked absolutely, all invisible.
+     * Only .active gets opacity:1.
+     * src is NOT set at build time — it's assigned lazily.
+     */
     .slide-img {
       position: absolute;
       inset: 0;
@@ -181,7 +178,28 @@
     }
     .slide-img.active { opacity: 1; }
 
-    /* Gradient overlay for caption */
+    /* Subtle spinner visible while the current slide's src loads */
+    .frame-spinner {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.25s;
+      z-index: 1;
+    }
+    .frame-spinner.visible { opacity: 1; }
+    .frame-spinner-ring {
+      width: 32px; height: 32px;
+      border: 2px solid #ffffff18;
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+
+    /* Caption gradient overlay */
     .main-frame::after {
       content: '';
       position: absolute;
@@ -191,8 +209,6 @@
       pointer-events: none;
       z-index: 2;
     }
-
-    /* Caption */
     .caption {
       position: absolute;
       bottom: 0; left: 0; right: 0;
@@ -204,33 +220,28 @@
       color: #a8c4a8;
     }
 
-    /* Prev / Next arrows */
+    /* Arrows */
     .arrow {
       position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
+      top: 50%; transform: translateY(-50%);
       z-index: 4;
       background: #0d221890;
       border: 1px solid #ffffff22;
       color: var(--gold-lt);
-      width: 48px;
-      height: 48px;
+      width: 48px; height: 48px;
       border-radius: 2px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       cursor: pointer;
       font-size: 1.3rem;
-      transition: background 0.2s, border-color 0.2s;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
       backdrop-filter: blur(6px);
-      user-select: none;
-      -webkit-user-select: none;
+      user-select: none; -webkit-user-select: none;
     }
     .arrow:hover { background: var(--gold); border-color: var(--gold); color: var(--moss); }
     .arrow-prev { left: 0.8rem; }
     .arrow-next { right: 0.8rem; }
 
-    /* Auto-play indicator */
+    /* Progress bar */
     .progress-bar {
       position: absolute;
       bottom: 0; left: 0;
@@ -257,8 +268,7 @@
     .thumbs::-webkit-scrollbar-thumb { background: var(--gold); }
 
     .thumb {
-      flex: 0 0 90px;
-      height: 60px;
+      flex: 0 0 90px; height: 60px;
       border-radius: 2px;
       overflow: hidden;
       cursor: pointer;
@@ -267,19 +277,11 @@
       opacity: 0.55;
       background: #0d1f15;
     }
-    .thumb img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    .thumb.active {
-      border-color: var(--gold);
-      opacity: 1;
-    }
-    .thumb:hover { opacity: 0.85; }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .thumb.active { border-color: var(--gold); opacity: 1; }
+    .thumb:hover  { opacity: 0.85; }
 
-    /* ── CONTROLS ROW ───────────────────────────────── */
+    /* ── CONTROLS ───────────────────────────────────── */
     .controls {
       display: flex;
       align-items: center;
@@ -287,7 +289,6 @@
       gap: 1.5rem;
       padding: 0.5rem 0 1rem;
     }
-
     .ctrl-btn {
       background: none;
       border: 1px solid #ffffff28;
@@ -302,29 +303,18 @@
       cursor: pointer;
       transition: background 0.2s, border-color 0.2s, color 0.2s;
     }
-    .ctrl-btn:hover, .ctrl-btn.playing {
-      background: var(--gold);
-      border-color: var(--gold);
-      color: var(--moss);
-    }
+    .ctrl-btn:hover,
+    .ctrl-btn.playing { background: var(--gold); border-color: var(--gold); color: var(--moss); }
 
-    .dots {
-      display: flex;
-      gap: 0.4rem;
-      align-items: center;
-    }
+    .dots { display: flex; gap: 0.4rem; align-items: center; }
     .dot {
-      width: 5px;
-      height: 5px;
+      width: 5px; height: 5px;
       border-radius: 50%;
       background: #ffffff30;
       cursor: pointer;
       transition: background 0.2s, transform 0.2s;
     }
-    .dot.active {
-      background: var(--gold);
-      transform: scale(1.4);
-    }
+    .dot.active { background: var(--gold); transform: scale(1.4); }
 
     /* ── FOOTER ─────────────────────────────────────── */
     footer {
@@ -349,7 +339,6 @@
 </head>
 <body>
 
-<!-- ── HEADER ──────────────────────────────────────────── -->
 <header>
   <div class="header-left">
     <p class="header-eyebrow">Photo Tour</p>
@@ -358,51 +347,41 @@
   <a href="index.html" class="back-link">← Back to Listing</a>
 </header>
 
-<!-- ── STAGE ───────────────────────────────────────────── -->
-<main class="stage" id="stage">
+<main class="stage">
 
-  <!-- Loading -->
   <div class="loading" id="loading">
     <div class="loading-spinner"></div>
     <p class="loading-text">Loading photos…</p>
   </div>
 
-  <!-- Error (hidden by default) -->
-  <div class="error-msg" id="error" style="display:none">
+  <div class="error-msg" id="error">
     <strong>Couldn't load photos</strong>
-    Photos couldn't be fetched right now. Try refreshing the page, or
-    <a href="index.html" style="color:var(--gold-lt);">return to the listing</a>.
+    Try refreshing, or <a href="index.html" style="color:var(--gold-lt);">return to the listing</a>.
   </div>
 
-  <!-- Slideshow (hidden until ready) -->
   <div class="slideshow" id="slideshow">
+    <div class="counter" id="counter"></div>
 
-    <div class="counter" id="counter">1 of …</div>
-
-    <!-- Main image frame -->
     <div class="main-frame" id="frame">
-      <div class="progress-bar" id="progress"></div>
-      <button class="arrow arrow-prev" id="btnPrev" aria-label="Previous photo">&#8592;</button>
-      <button class="arrow arrow-next" id="btnNext" aria-label="Next photo">&#8594;</button>
+      <div class="progress-bar"  id="progress"></div>
+      <div class="frame-spinner" id="spinner">
+        <div class="frame-spinner-ring"></div>
+      </div>
+      <button class="arrow arrow-prev" id="btnPrev" aria-label="Previous">&#8592;</button>
+      <button class="arrow arrow-next" id="btnNext" aria-label="Next">&#8594;</button>
       <div class="caption" id="caption"></div>
-      <!-- Images injected here -->
+      <!-- .slide-img elements injected here by JS -->
     </div>
 
-    <!-- Dot indicators (up to 20; hidden if more) -->
-    <div class="dots" id="dots"></div>
-
-    <!-- Controls -->
+    <div class="dots"     id="dots"></div>
     <div class="controls">
       <button class="ctrl-btn playing" id="btnPlay">⏸ Pause</button>
     </div>
-
-    <!-- Thumbnails -->
     <div class="thumbs" id="thumbs"></div>
-
   </div>
+
 </main>
 
-<!-- ── FOOTER ──────────────────────────────────────────── -->
 <footer>
   1603 West Creek Loop &nbsp;·&nbsp; Round Rock, TX 78681 &nbsp;·&nbsp;
   Listed by <a href="tel:+15124977748">Megan Peeples</a>, Central Metro Realty &nbsp;·&nbsp;
@@ -410,75 +389,123 @@
 </footer>
 
 <script>
-  // ── Config ──────────────────────────────────────────────
-  const REPO    = 'omegeth/westcreekloop.com';
-  const FOLDER  = 'images';
-  const API_URL = `https://api.github.com/repos/${REPO}/contents/${FOLDER}`;
-  const RAW_BASE= `https://raw.githubusercontent.com/${REPO}/main/${FOLDER}/`;
-  const INTERVAL= 5000; // ms between auto-advance
+  // ── Config ────────────────────────────────────────────────────────────────
+  const REPO     = 'omegeth/westcreekloop.com';
+  const FOLDER   = 'images';
+  const API_URL  = `https://api.github.com/repos/${REPO}/contents/${FOLDER}`;
+  const INTERVAL = 5000; // ms per slide
 
-  // ── State ──────────────────────────────────────────────
-  let images   = [];   // [{name, url, caption}]
-  let current  = 0;
-  let playing  = true;
-  let timer    = null;
-  let progTimer= null;
+  // ── State ─────────────────────────────────────────────────────────────────
+  let images    = [];
+  let current   = 0;
+  let playing   = true;
+  let autoTimer = null;
 
-  // ── Elements ───────────────────────────────────────────
-  const $loading  = document.getElementById('loading');
-  const $error    = document.getElementById('error');
-  const $slideshow= document.getElementById('slideshow');
-  const $frame    = document.getElementById('frame');
-  const $counter  = document.getElementById('counter');
-  const $caption  = document.getElementById('caption');
-  const $dots     = document.getElementById('dots');
-  const $thumbs   = document.getElementById('thumbs');
-  const $btnPrev  = document.getElementById('btnPrev');
-  const $btnNext  = document.getElementById('btnNext');
-  const $btnPlay  = document.getElementById('btnPlay');
-  const $progress = document.getElementById('progress');
+  // Which slide indices have had their src set already
+  const loadedSlides = new Set();
 
-  // ── Filename → readable caption ────────────────────────
+  // ── DOM refs ──────────────────────────────────────────────────────────────
+  const $loading   = document.getElementById('loading');
+  const $error     = document.getElementById('error');
+  const $slideshow = document.getElementById('slideshow');
+  const $frame     = document.getElementById('frame');
+  const $spinner   = document.getElementById('spinner');
+  const $counter   = document.getElementById('counter');
+  const $caption   = document.getElementById('caption');
+  const $dots      = document.getElementById('dots');
+  const $thumbs    = document.getElementById('thumbs');
+  const $btnPrev   = document.getElementById('btnPrev');
+  const $btnNext   = document.getElementById('btnNext');
+  const $btnPlay   = document.getElementById('btnPlay');
+  const $progress  = document.getElementById('progress');
+
+  // ── Filename → caption ────────────────────────────────────────────────────
   function toCaption(filename) {
-    // Strip extension
-    let s = filename.replace(/\.[^.]+$/, '');
-    // Strip leading address prefix like "1603WCreekLoop-"
-    s = s.replace(/^\d+[A-Za-z]+Loop-/i, '');
-    // Split camelCase and run-together words with a simple
-    // known-words approach: insert space before sequences
-    // of known short words. Fallback: just prettify hyphens.
-    s = s
-      .replace(/-/g, ' ')
-      .replace(/_/g, ' ')
-      // Insert spaces before uppercase letters (camelCase)
-      .replace(/([a-z])([A-Z])/g, '$1 $2')
-      // Capitalize first letter of each word
-      .replace(/\b\w/g, c => c.toUpperCase());
-    return s;
+    return filename
+      .replace(/\.[^.]+$/, '')                 // strip extension
+      .replace(/^\d+[A-Za-z]+Loop-/i, '')      // strip "1603WCreekLoop-"
+      .replace(/[-_]/g, ' ')                   // hyphens/underscores → space
+      .replace(/([a-z])([A-Z])/g, '$1 $2')    // camelCase → spaces
+      .replace(/\b\w/g, c => c.toUpperCase()); // Title Case
   }
 
-  // ── Fetch image list from GitHub API ───────────────────
+  // ── Progressive slide loading ─────────────────────────────────────────────
+  //
+  // The key fix: <img> elements exist in the DOM with NO src attribute.
+  // We only assign src when we actually need that image, serialising the
+  // TLS connections rather than blasting them all at page load.
+  //
+  // We load: current  (need it now)
+  //          current+1 (need it next)
+  //          current-1 (need it if user goes back)
+  //
+  function loadSlide(idx) {
+    if (idx < 0 || idx >= images.length) return;
+    if (loadedSlides.has(idx)) return;
+    loadedSlides.add(idx);
+
+    const slideEls = $frame.querySelectorAll('.slide-img');
+    const el = slideEls[idx];
+    if (!el) return;
+
+    // Show frame spinner only for the currently visible slide
+    if (idx === current) $spinner.classList.add('visible');
+
+    el.onload  = () => { if (idx === current) $spinner.classList.remove('visible'); };
+    el.onerror = () => {
+      // Allow a retry on next navigation
+      loadedSlides.delete(idx);
+      if (idx === current) $spinner.classList.remove('visible');
+    };
+
+    el.src = images[idx].url;
+  }
+
+  function preloadAround(idx) {
+    loadSlide(idx);
+    loadSlide((idx + 1) % images.length);
+    loadSlide((idx - 1 + images.length) % images.length);
+  }
+
+  // ── Thumbnail lazy loading via IntersectionObserver ───────────────────────
+  //
+  // Thumbnail <img> elements are built with data-src instead of src.
+  // The observer sets src only when the thumb scrolls into view,
+  // again avoiding a burst of connections on page load.
+  //
+  const thumbObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const img = entry.target.querySelector('img[data-src]');
+      if (img) {
+        img.src = img.dataset.src;
+        img.removeAttribute('data-src');
+      }
+      thumbObserver.unobserve(entry.target);
+    });
+  }, {
+    root: $thumbs,
+    rootMargin: '0px 150px 0px 150px' // load a couple thumbs ahead of scroll
+  });
+
+  // ── Fetch file list from GitHub Contents API ──────────────────────────────
   async function loadImages() {
     try {
       const res = await fetch(API_URL, {
-        headers: { 'Accept': 'application/vnd.github.v3+json' }
+        headers: { Accept: 'application/vnd.github.v3+json' }
       });
-      if (!res.ok) throw new Error(`GitHub API returned ${res.status}`);
-      const files = await res.json();
+      if (!res.ok) throw new Error(`GitHub API: ${res.status}`);
 
-      // Filter to image files only
+      const files = await res.json();
       const imgExts = /\.(jpe?g|png|gif|webp|avif)$/i;
+
       images = files
         .filter(f => f.type === 'file' && imgExts.test(f.name))
-        .map(f => ({
-          name:    f.name,
-          url:     f.download_url || `${RAW_BASE}${encodeURIComponent(f.name)}`,
-          caption: toCaption(f.name)
-        }));
+        .map(f => ({ name: f.name, url: f.download_url, caption: toCaption(f.name) }));
 
-      if (images.length === 0) throw new Error('No images found in folder');
-
+      if (!images.length) throw new Error('No images found in folder.');
       buildSlideshow();
+
     } catch (err) {
       console.error(err);
       $loading.style.display = 'none';
@@ -486,19 +513,20 @@
     }
   }
 
-  // ── Build DOM ──────────────────────────────────────────
+  // ── Build DOM ─────────────────────────────────────────────────────────────
   function buildSlideshow() {
-    // Create <img> elements inside frame
+    const $captionEl = document.getElementById('caption');
+
+    // Slide images — NO src attribute yet
     images.forEach((img, i) => {
       const el = document.createElement('img');
       el.className = 'slide-img' + (i === 0 ? ' active' : '');
-      el.src  = img.url;
-      el.alt  = img.caption;
-      el.loading = i === 0 ? 'eager' : 'lazy';
-      $frame.appendChild(el);
+      el.alt = img.caption;
+      // Deliberately no el.src here
+      $frame.insertBefore(el, $captionEl);
     });
 
-    // Dot indicators (only if ≤ 20 images, to avoid clutter)
+    // Dot indicators (skip if more than 20 to avoid clutter)
     if (images.length <= 20) {
       images.forEach((_, i) => {
         const d = document.createElement('div');
@@ -508,90 +536,92 @@
       });
     }
 
-    // Thumbnails
+    // Thumbnails — data-src, not src
     images.forEach((img, i) => {
       const wrap = document.createElement('div');
       wrap.className = 'thumb' + (i === 0 ? ' active' : '');
       wrap.addEventListener('click', () => goTo(i));
 
-      const t = document.createElement('img');
-      t.src     = img.url;
-      t.alt     = img.caption;
-      t.loading = 'lazy';
+      const t   = document.createElement('img');
+      t.dataset.src = img.url;   // observer will set .src on scroll
+      t.alt = img.caption;
       wrap.appendChild(t);
       $thumbs.appendChild(wrap);
+
+      thumbObserver.observe(wrap);
     });
 
-    // Show slideshow
+    // Show slideshow, hide loader
     $loading.style.display = 'none';
     $slideshow.classList.add('ready');
 
+    // Load only the first slide + neighbours — NOT all slides
+    preloadAround(0);
+
     updateUI();
-    if (playing) startAuto();
+    startAuto();
   }
 
-  // ── Navigation ─────────────────────────────────────────
+  // ── Navigation ────────────────────────────────────────────────────────────
   function goTo(idx) {
-    const slides = $frame.querySelectorAll('.slide-img');
-    const thumbs  = $thumbs.querySelectorAll('.thumb');
-    const dots    = $dots.querySelectorAll('.dot');
+    const slideEls = $frame.querySelectorAll('.slide-img');
+    const thumbEls = $thumbs.querySelectorAll('.thumb');
+    const dotEls   = $dots.querySelectorAll('.dot');
 
-    slides[current].classList.remove('active');
-    thumbs[current]?.classList.remove('active');
-    dots[current]?.classList.remove('active');
+    slideEls[current].classList.remove('active');
+    thumbEls[current]?.classList.remove('active');
+    dotEls[current]?.classList.remove('active');
 
     current = (idx + images.length) % images.length;
 
-    slides[current].classList.add('active');
-    thumbs[current]?.classList.add('active');
-    dots[current]?.classList.add('active');
+    // Trigger loads for this slide and its neighbours
+    preloadAround(current);
 
-    // Scroll active thumb into view
-    thumbs[current]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    slideEls[current].classList.add('active');
+    thumbEls[current]?.classList.add('active');
+    dotEls[current]?.classList.add('active');
+
+    thumbEls[current]?.scrollIntoView({
+      behavior: 'smooth', block: 'nearest', inline: 'center'
+    });
 
     updateUI();
     if (playing) resetAuto();
   }
 
-  function prev() { goTo(current - 1); }
-  function next() { goTo(current + 1); }
+  const prev = () => goTo(current - 1);
+  const next = () => goTo(current + 1);
 
-  // ── UI sync ─────────────────────────────────────────────
+  // ── UI sync ───────────────────────────────────────────────────────────────
   function updateUI() {
     $counter.textContent = `${current + 1} of ${images.length}`;
-    $caption.textContent = images[current].caption;
+    $caption.textContent  = images[current].caption;
   }
 
-  // ── Auto-play ───────────────────────────────────────────
+  // ── Auto-play ─────────────────────────────────────────────────────────────
   function startAuto() {
-    clearInterval(timer);
-    timer = setInterval(() => next(), INTERVAL);
+    clearInterval(autoTimer);
+    autoTimer = setInterval(next, INTERVAL);
     animateProgress();
   }
-
   function stopAuto() {
-    clearInterval(timer);
-    clearTimeout(progTimer);
+    clearInterval(autoTimer);
     $progress.style.transition = 'none';
-    $progress.style.width = '0%';
+    $progress.style.width      = '0%';
   }
-
-  function resetAuto() {
-    if (playing) { stopAuto(); startAuto(); }
-  }
+  function resetAuto() { stopAuto(); startAuto(); }
 
   function animateProgress() {
     $progress.style.transition = 'none';
-    $progress.style.width = '0%';
-    // Force reflow
-    void $progress.offsetWidth;
+    $progress.style.width      = '0%';
+    void $progress.offsetWidth;                         // force reflow
     $progress.style.transition = `width ${INTERVAL}ms linear`;
-    $progress.style.width = '100%';
+    $progress.style.width      = '100%';
   }
 
-  // ── Controls ────────────────────────────────────────────
-  $btnPrev.addEventListener('click', () => { prev(); });
-  $btnNext.addEventListener('click', () => { next(); });
+  // ── Controls ──────────────────────────────────────────────────────────────
+  $btnPrev.addEventListener('click', prev);
+  $btnNext.addEventListener('click', next);
 
   $btnPlay.addEventListener('click', () => {
     playing = !playing;
@@ -606,26 +636,28 @@
     }
   });
 
-  // Pause on hover over main frame
-  $frame.addEventListener('mouseenter', () => { if (playing) stopAuto(); });
-  $frame.addEventListener('mouseleave', () => { if (playing) startAuto(); });
+  // Pause while hovering the main image
+  $frame.addEventListener('mouseenter', () => { if (playing) stopAuto();    });
+  $frame.addEventListener('mouseleave', () => { if (playing) startAuto();   });
 
-  // Keyboard navigation
+  // Keyboard: arrows + spacebar
   document.addEventListener('keydown', e => {
     if (e.key === 'ArrowLeft')  prev();
     if (e.key === 'ArrowRight') next();
     if (e.key === ' ') { e.preventDefault(); $btnPlay.click(); }
   });
 
-  // Touch / swipe support
+  // Touch swipe
   let touchStartX = 0;
-  $frame.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
-  $frame.addEventListener('touchend',   e => {
+  $frame.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].clientX;
+  }, { passive: true });
+  $frame.addEventListener('touchend', e => {
     const dx = e.changedTouches[0].clientX - touchStartX;
     if (Math.abs(dx) > 40) dx < 0 ? next() : prev();
   });
 
-  // ── Boot ────────────────────────────────────────────────
+  // ── Boot ──────────────────────────────────────────────────────────────────
   loadImages();
 </script>
 </body>
