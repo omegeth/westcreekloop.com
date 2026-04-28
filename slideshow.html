@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Photo Tour · 1603 West Creek Loop · Round Rock, TX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --cream:    #F7F2E9;
+      --linen:    #EDE6D6;
+      --bark:     #3B2A1A;
+      --moss:     #1E3D2A;
+      --sage:     #4A7C59;
+      --gold:     #B8974A;
+      --gold-lt:  #D4B06A;
+      --creek:    #4E7D96;
+      --creek-lt: #8AB4C8;
+      --white:    #FDFAF5;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bark);
+      color: var(--white);
+      font-family: 'Jost', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── HEADER ─────────────────────────────────────── */
+    header {
+      background: var(--moss);
+      padding: 1.2rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      border-bottom: 1px solid #ffffff12;
+      position: relative;
+      z-index: 10;
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .header-eyebrow {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--gold-lt);
+    }
+
+    .header-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.1rem, 3vw, 1.6rem);
+      font-weight: 300;
+      color: var(--white);
+      line-height: 1.1;
+    }
+    .header-title em { font-style: italic; color: var(--gold-lt); }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--gold-lt);
+      text-decoration: none;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      border: 1px solid var(--gold);
+      padding: 0.5rem 1.1rem;
+      border-radius: 2px;
+      transition: background 0.2s, color 0.2s;
+      white-space: nowrap;
+    }
+    .back-link:hover {
+      background: var(--gold);
+      color: var(--moss);
+    }
+
+    /* ── MAIN STAGE ─────────────────────────────────── */
+    .stage {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem 1rem;
+      position: relative;
+    }
+
+    /* Loading state */
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.2rem;
+      color: #7a9e8a;
+    }
+    .loading-spinner {
+      width: 36px;
+      height: 36px;
+      border: 2px solid #ffffff18;
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text {
+      font-size: 0.72rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold-lt);
+    }
+
+    /* Error state */
+    .error-msg {
+      text-align: center;
+      color: #c89070;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      max-width: 460px;
+    }
+    .error-msg strong {
+      display: block;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-weight: 300;
+      color: var(--gold-lt);
+      margin-bottom: 0.5rem;
+    }
+
+    /* Slideshow wrapper */
+    .slideshow { display: none; width: 100%; max-width: 1100px; flex-direction: column; align-items: center; gap: 1.5rem; }
+    .slideshow.ready { display: flex; }
+
+    /* Counter */
+    .counter {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold-lt);
+      align-self: flex-end;
+    }
+
+    /* Main image frame */
+    .main-frame {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/10;
+      background: #0d1f15;
+      border-radius: 3px;
+      overflow: hidden;
+      box-shadow: 0 24px 72px #00000060;
+    }
+
+    .slide-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.55s ease;
+    }
+    .slide-img.active { opacity: 1; }
+
+    /* Gradient overlay for caption */
+    .main-frame::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 30%;
+      background: linear-gradient(to top, #0d2218cc, transparent);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Caption */
+    .caption {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      z-index: 3;
+      padding: 1rem 1.4rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #a8c4a8;
+    }
+
+    /* Prev / Next arrows */
+    .arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 4;
+      background: #0d221890;
+      border: 1px solid #ffffff22;
+      color: var(--gold-lt);
+      width: 48px;
+      height: 48px;
+      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.3rem;
+      transition: background 0.2s, border-color 0.2s;
+      backdrop-filter: blur(6px);
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .arrow:hover { background: var(--gold); border-color: var(--gold); color: var(--moss); }
+    .arrow-prev { left: 0.8rem; }
+    .arrow-next { right: 0.8rem; }
+
+    /* Auto-play indicator */
+    .progress-bar {
+      position: absolute;
+      bottom: 0; left: 0;
+      height: 2px;
+      background: var(--gold);
+      width: 0%;
+      z-index: 5;
+      transition: width linear;
+    }
+
+    /* ── THUMBNAILS ─────────────────────────────────── */
+    .thumbs {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      width: 100%;
+      padding-bottom: 0.5rem;
+      scrollbar-width: thin;
+      scrollbar-color: var(--gold) #0d2218;
+    }
+    .thumbs::-webkit-scrollbar { height: 3px; }
+    .thumbs::-webkit-scrollbar-track { background: #0d2218; }
+    .thumbs::-webkit-scrollbar-thumb { background: var(--gold); }
+
+    .thumb {
+      flex: 0 0 90px;
+      height: 60px;
+      border-radius: 2px;
+      overflow: hidden;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color 0.2s, opacity 0.2s;
+      opacity: 0.55;
+      background: #0d1f15;
+    }
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .thumb.active {
+      border-color: var(--gold);
+      opacity: 1;
+    }
+    .thumb:hover { opacity: 0.85; }
+
+    /* ── CONTROLS ROW ───────────────────────────────── */
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      padding: 0.5rem 0 1rem;
+    }
+
+    .ctrl-btn {
+      background: none;
+      border: 1px solid #ffffff28;
+      color: var(--gold-lt);
+      font-family: 'Jost', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 0.5rem 1.2rem;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+    .ctrl-btn:hover, .ctrl-btn.playing {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: var(--moss);
+    }
+
+    .dots {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+    }
+    .dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #ffffff30;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .dot.active {
+      background: var(--gold);
+      transform: scale(1.4);
+    }
+
+    /* ── FOOTER ─────────────────────────────────────── */
+    footer {
+      background: var(--bark);
+      border-top: 1px solid #ffffff10;
+      padding: 1.2rem 2rem;
+      text-align: center;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      color: #7a5a38;
+    }
+    footer a { color: var(--gold-lt); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── RESPONSIVE ─────────────────────────────────── */
+    @media (max-width: 600px) {
+      .main-frame { aspect-ratio: 4/3; }
+      .arrow { width: 38px; height: 38px; font-size: 1rem; }
+      .thumb { flex: 0 0 68px; height: 46px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ──────────────────────────────────────────── -->
+<header>
+  <div class="header-left">
+    <p class="header-eyebrow">Photo Tour</p>
+    <h1 class="header-title">1603 <em>West Creek Loop</em> &nbsp;·&nbsp; Round Rock, TX</h1>
+  </div>
+  <a href="index.html" class="back-link">← Back to Listing</a>
+</header>
+
+<!-- ── STAGE ───────────────────────────────────────────── -->
+<main class="stage" id="stage">
+
+  <!-- Loading -->
+  <div class="loading" id="loading">
+    <div class="loading-spinner"></div>
+    <p class="loading-text">Loading photos…</p>
+  </div>
+
+  <!-- Error (hidden by default) -->
+  <div class="error-msg" id="error" style="display:none">
+    <strong>Couldn't load photos</strong>
+    Photos couldn't be fetched right now. Try refreshing the page, or
+    <a href="index.html" style="color:var(--gold-lt);">return to the listing</a>.
+  </div>
+
+  <!-- Slideshow (hidden until ready) -->
+  <div class="slideshow" id="slideshow">
+
+    <div class="counter" id="counter">1 of …</div>
+
+    <!-- Main image frame -->
+    <div class="main-frame" id="frame">
+      <div class="progress-bar" id="progress"></div>
+      <button class="arrow arrow-prev" id="btnPrev" aria-label="Previous photo">&#8592;</button>
+      <button class="arrow arrow-next" id="btnNext" aria-label="Next photo">&#8594;</button>
+      <div class="caption" id="caption"></div>
+      <!-- Images injected here -->
+    </div>
+
+    <!-- Dot indicators (up to 20; hidden if more) -->
+    <div class="dots" id="dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="ctrl-btn playing" id="btnPlay">⏸ Pause</button>
+    </div>
+
+    <!-- Thumbnails -->
+    <div class="thumbs" id="thumbs"></div>
+
+  </div>
+</main>
+
+<!-- ── FOOTER ──────────────────────────────────────────── -->
+<footer>
+  1603 West Creek Loop &nbsp;·&nbsp; Round Rock, TX 78681 &nbsp;·&nbsp;
+  Listed by <a href="tel:+15124977748">Megan Peeples</a>, Central Metro Realty &nbsp;·&nbsp;
+  <a href="https://www.realtor.com/realestateandhomes-detail/M8727881805" target="_blank" rel="noopener">Realtor.com Listing</a>
+</footer>
+
+<script>
+  // ── Config ──────────────────────────────────────────────
+  const REPO    = 'omegeth/westcreekloop.com';
+  const FOLDER  = 'images';
+  const API_URL = `https://api.github.com/repos/${REPO}/contents/${FOLDER}`;
+  const RAW_BASE= `https://raw.githubusercontent.com/${REPO}/main/${FOLDER}/`;
+  const INTERVAL= 5000; // ms between auto-advance
+
+  // ── State ──────────────────────────────────────────────
+  let images   = [];   // [{name, url, caption}]
+  let current  = 0;
+  let playing  = true;
+  let timer    = null;
+  let progTimer= null;
+
+  // ── Elements ───────────────────────────────────────────
+  const $loading  = document.getElementById('loading');
+  const $error    = document.getElementById('error');
+  const $slideshow= document.getElementById('slideshow');
+  const $frame    = document.getElementById('frame');
+  const $counter  = document.getElementById('counter');
+  const $caption  = document.getElementById('caption');
+  const $dots     = document.getElementById('dots');
+  const $thumbs   = document.getElementById('thumbs');
+  const $btnPrev  = document.getElementById('btnPrev');
+  const $btnNext  = document.getElementById('btnNext');
+  const $btnPlay  = document.getElementById('btnPlay');
+  const $progress = document.getElementById('progress');
+
+  // ── Filename → readable caption ────────────────────────
+  function toCaption(filename) {
+    // Strip extension
+    let s = filename.replace(/\.[^.]+$/, '');
+    // Strip leading address prefix like "1603WCreekLoop-"
+    s = s.replace(/^\d+[A-Za-z]+Loop-/i, '');
+    // Split camelCase and run-together words with a simple
+    // known-words approach: insert space before sequences
+    // of known short words. Fallback: just prettify hyphens.
+    s = s
+      .replace(/-/g, ' ')
+      .replace(/_/g, ' ')
+      // Insert spaces before uppercase letters (camelCase)
+      .replace(/([a-z])([A-Z])/g, '$1 $2')
+      // Capitalize first letter of each word
+      .replace(/\b\w/g, c => c.toUpperCase());
+    return s;
+  }
+
+  // ── Fetch image list from GitHub API ───────────────────
+  async function loadImages() {
+    try {
+      const res = await fetch(API_URL, {
+        headers: { 'Accept': 'application/vnd.github.v3+json' }
+      });
+      if (!res.ok) throw new Error(`GitHub API returned ${res.status}`);
+      const files = await res.json();
+
+      // Filter to image files only
+      const imgExts = /\.(jpe?g|png|gif|webp|avif)$/i;
+      images = files
+        .filter(f => f.type === 'file' && imgExts.test(f.name))
+        .map(f => ({
+          name:    f.name,
+          url:     f.download_url || `${RAW_BASE}${encodeURIComponent(f.name)}`,
+          caption: toCaption(f.name)
+        }));
+
+      if (images.length === 0) throw new Error('No images found in folder');
+
+      buildSlideshow();
+    } catch (err) {
+      console.error(err);
+      $loading.style.display = 'none';
+      $error.style.display   = 'block';
+    }
+  }
+
+  // ── Build DOM ──────────────────────────────────────────
+  function buildSlideshow() {
+    // Create <img> elements inside frame
+    images.forEach((img, i) => {
+      const el = document.createElement('img');
+      el.className = 'slide-img' + (i === 0 ? ' active' : '');
+      el.src  = img.url;
+      el.alt  = img.caption;
+      el.loading = i === 0 ? 'eager' : 'lazy';
+      $frame.appendChild(el);
+    });
+
+    // Dot indicators (only if ≤ 20 images, to avoid clutter)
+    if (images.length <= 20) {
+      images.forEach((_, i) => {
+        const d = document.createElement('div');
+        d.className = 'dot' + (i === 0 ? ' active' : '');
+        d.addEventListener('click', () => goTo(i));
+        $dots.appendChild(d);
+      });
+    }
+
+    // Thumbnails
+    images.forEach((img, i) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'thumb' + (i === 0 ? ' active' : '');
+      wrap.addEventListener('click', () => goTo(i));
+
+      const t = document.createElement('img');
+      t.src     = img.url;
+      t.alt     = img.caption;
+      t.loading = 'lazy';
+      wrap.appendChild(t);
+      $thumbs.appendChild(wrap);
+    });
+
+    // Show slideshow
+    $loading.style.display = 'none';
+    $slideshow.classList.add('ready');
+
+    updateUI();
+    if (playing) startAuto();
+  }
+
+  // ── Navigation ─────────────────────────────────────────
+  function goTo(idx) {
+    const slides = $frame.querySelectorAll('.slide-img');
+    const thumbs  = $thumbs.querySelectorAll('.thumb');
+    const dots    = $dots.querySelectorAll('.dot');
+
+    slides[current].classList.remove('active');
+    thumbs[current]?.classList.remove('active');
+    dots[current]?.classList.remove('active');
+
+    current = (idx + images.length) % images.length;
+
+    slides[current].classList.add('active');
+    thumbs[current]?.classList.add('active');
+    dots[current]?.classList.add('active');
+
+    // Scroll active thumb into view
+    thumbs[current]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+
+    updateUI();
+    if (playing) resetAuto();
+  }
+
+  function prev() { goTo(current - 1); }
+  function next() { goTo(current + 1); }
+
+  // ── UI sync ─────────────────────────────────────────────
+  function updateUI() {
+    $counter.textContent = `${current + 1} of ${images.length}`;
+    $caption.textContent = images[current].caption;
+  }
+
+  // ── Auto-play ───────────────────────────────────────────
+  function startAuto() {
+    clearInterval(timer);
+    timer = setInterval(() => next(), INTERVAL);
+    animateProgress();
+  }
+
+  function stopAuto() {
+    clearInterval(timer);
+    clearTimeout(progTimer);
+    $progress.style.transition = 'none';
+    $progress.style.width = '0%';
+  }
+
+  function resetAuto() {
+    if (playing) { stopAuto(); startAuto(); }
+  }
+
+  function animateProgress() {
+    $progress.style.transition = 'none';
+    $progress.style.width = '0%';
+    // Force reflow
+    void $progress.offsetWidth;
+    $progress.style.transition = `width ${INTERVAL}ms linear`;
+    $progress.style.width = '100%';
+  }
+
+  // ── Controls ────────────────────────────────────────────
+  $btnPrev.addEventListener('click', () => { prev(); });
+  $btnNext.addEventListener('click', () => { next(); });
+
+  $btnPlay.addEventListener('click', () => {
+    playing = !playing;
+    if (playing) {
+      $btnPlay.textContent = '⏸ Pause';
+      $btnPlay.classList.add('playing');
+      startAuto();
+    } else {
+      $btnPlay.textContent = '▶ Play';
+      $btnPlay.classList.remove('playing');
+      stopAuto();
+    }
+  });
+
+  // Pause on hover over main frame
+  $frame.addEventListener('mouseenter', () => { if (playing) stopAuto(); });
+  $frame.addEventListener('mouseleave', () => { if (playing) startAuto(); });
+
+  // Keyboard navigation
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft')  prev();
+    if (e.key === 'ArrowRight') next();
+    if (e.key === ' ') { e.preventDefault(); $btnPlay.click(); }
+  });
+
+  // Touch / swipe support
+  let touchStartX = 0;
+  $frame.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  $frame.addEventListener('touchend',   e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 40) dx < 0 ? next() : prev();
+  });
+
+  // ── Boot ────────────────────────────────────────────────
+  loadImages();
+</script>
+</body>
+</html>
